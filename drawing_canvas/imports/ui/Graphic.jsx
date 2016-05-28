@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Point, PDollarRecognizer } from './PDollar.js'
 import $ from 'jquery';
 
 export default class Graphic extends Component{
@@ -9,7 +10,13 @@ export default class Graphic extends Component{
     this.clickX = new Array();
     this.clickY = new Array();
     this.clickDrag = new Array();
+    this.pointArray = new Array();
 
+    window.pdollar = new PDollarRecognizer();
+    window.pointArray = this.pointArray;
+    window.clickX = this.clickX;
+    window.clickY = this.clickY;
+    // window.recognize = 
   }
 
   componentDidMount(){
@@ -23,7 +30,6 @@ export default class Graphic extends Component{
     this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
     this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
 
-    this.drawDot = this.drawDot.bind(this);
     this.clearCanvas = this.clearCanvas.bind(this);
     this.getMousePos = this.getMousePos.bind(this);
     this.getTouchPos = this.getTouchPos.bind(this);
@@ -39,41 +45,13 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
-  drawDot(ctx,x,y,size) {
-    // Let's use black by setting RGB values to 0, and 255 alpha (completely opaque)
-    r=0; g=0; b=0; a=255;
-
-    // Select a fill style
-    ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
-
-    context.strokeStyle = "#df4b26";
-    context.lineJoin = "round";
-    context.lineWidth = 5;
-
-    for(var i=0; i < clickX.length; i++) {    
-      context.beginPath();
-      if(clickDrag[i] && i){
-        context.moveTo(clickX[i-1], clickY[i-1]);
-      }else{
-        context.moveTo(clickX[i]-1, clickY[i]);
-      }
-      context.lineTo(clickX[i], clickY[i]);
-      context.closePath();
-      context.stroke();
-    }
-
-
-
-    // Draw a filled circle
-    ctx.beginPath();
-    ctx.lineJoin = "round";
-    ctx.arc(x, y, size, 0, Math.PI*2, true); 
-    ctx.closePath();
-    ctx.fill();
-  } 
-
   clearCanvas(){
+    console.log(this.clickX + " " + this.clickY);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    alert(window.pdollar.Recognize(pointArray).Name);
+    this.clickX.length = 0;
+    this.clickY.length = 0;
+    this.pointArray.length = 0;
   }
   redraw(){
     // this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); // Clears the canvas
@@ -166,8 +144,8 @@ export default class Graphic extends Component{
     // this.mouseY = e.pageY - this.canvas.offsetTop;
 
     this.getTouchPos();
-
-    this.addClick(this.touchX, this.touchY, false);
+    this.paint = true;
+    this.addClick(this.touchX, this.touchY, true);
     this.redraw();
 
     event.preventDefault();
@@ -188,9 +166,10 @@ export default class Graphic extends Component{
       // event.preventDefault();
       this.getTouchPos();
 
-
-      this.addClick(this.touchX, this.touchY, true);
-      this.redraw();
+      if(this.paint){
+        this.addClick(this.touchX, this.touchY, true);
+        this.redraw(); 
+      }
     if(this.paint){
     }
 
@@ -201,6 +180,10 @@ export default class Graphic extends Component{
   {
     this.clickX.push(x);
     this.clickY.push(y);
+    if(!isNaN(x) && !isNaN(y)){
+      var point = new Point(x, y, 2);
+      this.pointArray.push(point);
+    }
     this.clickDrag.push(dragging);
   }
 
