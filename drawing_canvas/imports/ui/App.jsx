@@ -11,8 +11,6 @@ export default class App extends Component {
   
   constructor(){
     super();
-    this.state = { rotation: 0 };
-    this.tick = this.tick.bind(this);
   }
 
   componentDidMount(){
@@ -20,7 +18,6 @@ export default class App extends Component {
   }
 
   tick(){
-    this.setState({ rotation: this.state.rotation + .01 });
     requestAnimationFrame(this.tick());
   }
 

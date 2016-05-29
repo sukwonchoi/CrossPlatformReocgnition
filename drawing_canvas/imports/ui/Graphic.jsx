@@ -21,6 +21,7 @@ export default class Graphic extends Component{
 
   componentDidMount(){
     this.canvas = this.refs.context;
+    this.gestureNameTextBox = this.refs.gestureNameTextBox;
     this.ctx = this.canvas.getContext('2d');
 
     this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
@@ -31,6 +32,7 @@ export default class Graphic extends Component{
     this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
 
     this.clearCanvas = this.clearCanvas.bind(this);
+    this.addGesture = this.addGesture.bind(this);
     this.getMousePos = this.getMousePos.bind(this);
     this.getTouchPos = this.getTouchPos.bind(this);
     this.addClick = this.addClick.bind(this);
@@ -43,6 +45,12 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
     this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+  }
+
+  addGesture(){
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // var gestureName = this.gestureNameTextBox.value;
+    window.pdollar.AddGesture("test", pointArray);
   }
 
   clearCanvas(){
@@ -164,6 +172,8 @@ export default class Graphic extends Component{
         var touch = e.touches[0]; // Get the information for finger #1
         this.touchX=touch.pageX-touch.target.offsetLeft;
         this.touchY=touch.pageY-touch.target.offsetTop;
+        //
+        //<input type="text" id="gestureName" ref="gestureNameTextBox" placeholder="Gesture Name" />
       }
     }
   }
@@ -172,8 +182,9 @@ export default class Graphic extends Component{
   render(){
     return (
       <div>
-        <canvas width={screen.width} height={screen.height - 50} ref="context" />
+        <canvas width={screen.width} height={screen.height - 80} ref="context" />
         <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
+        <input type="submit" onClick={this.addGesture} value="Add Gesture" id="clearbutton"  />
       </div>
       );
   }
