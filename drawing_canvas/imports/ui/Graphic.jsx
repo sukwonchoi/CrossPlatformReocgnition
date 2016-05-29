@@ -53,6 +53,7 @@ export default class Graphic extends Component{
     this.clickY.length = 0;
     this.pointArray.length = 0;
   }
+
   redraw(){
     // this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); // Clears the canvas
 
@@ -60,34 +61,22 @@ export default class Graphic extends Component{
     this.ctx.lineJoin = "round";
     this.ctx.lineWidth = 5;
 
-    var i = this.clickX.length - 1;
+    var currentStroke = this.clickX.length - 1;
+    var currentDot = this.clickX[currentStroke].length - 1;
+
     this.ctx.beginPath();
-    if(this.clickDrag[i] && i){
-      this.ctx.moveTo(this.clickX[i-1], this.clickY[i-1]);
+    if(this.clickDrag[currentStroke][currentDot] && currentDot){
+      this.ctx.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
     }else{
-      this.ctx.moveTo(this.clickX[i]-1, this.clickY[i]);
+      this.ctx.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
     }
-    this.ctx.lineTo(this.clickX[i], this.clickY[i]);
+    this.ctx.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
     this.ctx.closePath();
     this.ctx.stroke();
-
-    // for(var i=0; i < this.clickX.length; i++) {    
-    //   this.ctx.beginPath();
-    //   if(this.clickDrag[i] && i){
-    //     this.ctx.moveTo(this.clickX[i-1], this.clickY[i-1]);
-    //   }else{
-    //     this.ctx.moveTo(this.clickX[i]-1, this.clickY[i]);
-    //   }
-    //   this.ctx.lineTo(this.clickX[i], this.clickY[i]);
-    //   this.ctx.closePath();
-    //   this.ctx.stroke();
-    // }
   }
 
   // Keep track of the mouse button being pressed and draw a dot at current location
   sketchpad_mouseDown(e) {
-    // this.mouseDown=1;
-    // this.drawDot(this.ctx,this.mouseX,this.mouseY,12);
     this.mouseX = e.pageX - this.canvas.offsetLeft;
     this.mouseY = e.pageY - this.canvas.offsetTop;
 
@@ -103,13 +92,6 @@ export default class Graphic extends Component{
 
     // Keep track of the mouse position and draw a dot if mouse button is currently pressed
   sketchpad_mouseMove(e) { 
-    // Update the mouse co-ordinates when moved
-    // this.getMousePos(e);
-
-    // // Draw a dot if the mouse button is currently being pressed
-    // if (this.mouseDown==1) {
-    //     this.drawDot(this.ctx,this.mouseX,this.mouseY,12);
-    // }
     if(this.paint){
       this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop, true);
       this.redraw();
@@ -132,19 +114,12 @@ export default class Graphic extends Component{
 
   // Draw something when a touch start is detected
   sketchpad_touchStart() {
-      // // Update the touch co-ordinates
-      // this.getTouchPos();
-
-      // this.drawDot(this.ctx,this.touchX,this.touchY,12);
-
-      // // Prevents an additional mousedown event being triggered
-      // event.preventDefault();
-
-    // this.mouseX = e.pageX - this.canvas.offsetLeft;
-    // this.mouseY = e.pageY - this.canvas.offsetTop;
-
     this.getTouchPos();
     this.paint = true;
+
+    this.clickX.push(new Array());
+    this.clickY.push(new Array());
+    this.clickDrag.push(new Array());
     this.addClick(this.touchX, this.touchY, true);
     this.redraw();
 
@@ -153,17 +128,8 @@ export default class Graphic extends Component{
   sketchpad_touchEnd() {
     this.paint = false;
   }
-  // Draw something and prevent the default scrolling when touch movement is detected
+
   sketchpad_touchMove(e) { 
-      // Update the touch co-ordinates
-      // this.getTouchPos(e);
-
-      // console.log("touch move");
-      // // During a touchmove event, unlike a mousemove event, we don't need to check if the touch is engaged, since there will always be contact with the screen by definition.
-      // this.drawDot(this.ctx,this.touchX,this.touchY,12); 
-
-      // // Prevent a scrolling action as a result of this touchmove triggering.
-      // event.preventDefault();
       this.getTouchPos();
 
       if(this.paint){
@@ -178,20 +144,17 @@ export default class Graphic extends Component{
 
   addClick(x, y, dragging)
   {
-    this.clickX.push(x);
-    this.clickY.push(y);
+    var currentStroke = this.clickX.length - 1;
+
+    this.clickX[currentStroke].push(x);
+    this.clickY[currentStroke].push(y);
     if(!isNaN(x) && !isNaN(y)){
       var point = new Point(x, y, 2);
       this.pointArray.push(point);
     }
-    this.clickDrag.push(dragging);
+    this.clickDrag[currentStroke].push(dragging);
   }
 
-
-  // Get the touch position relative to the top-left of the canvas
-  // When we get the raw values of pageX and pageY below, they take into account the scrolling on the page
-  // but not the position relative to our target div. We'll adjust them using "target.offsetLeft" and
-  // "target.offsetTop" to get the correct values in relation to the top left of the canvas.
   getTouchPos(e) {
     if (!e)
         var e = event;
