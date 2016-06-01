@@ -16,13 +16,11 @@ export default class Graphic extends Component{
     window.pointArray = this.pointArray;
     window.clickX = this.clickX;
     window.clickY = this.clickY;
-    // window.recognize = 
   }
 
   componentDidMount(){
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
-    // this.gestureNameTextBox = this.refs.gestureNameTextBox;
     this.ctx = this.canvas.getContext('2d');
     window.ctx = this.ctx;
 
@@ -49,10 +47,14 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
-  addGesture(){
+  addGesture(e){
+    e.preventDefault();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // var gestureName = this.gestureNameTextBox.value;
-    window.pdollar.AddGesture("test", pointArray);
+
+    var form = e.target;
+    var gestureName = form.querySelector('[name="gesturename"]').value;
+
+    window.pdollar.AddGesture(gestureName, pointArray);
   }
 
   clearCanvas(){
@@ -189,7 +191,10 @@ export default class Graphic extends Component{
       <div>
         <canvas width={screen.width} height={screen.height - 80} ref="context" />
         <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
-        <input type="submit" onClick={this.addGesture} value="Add Gesture" id="clearbutton"  />
+        <form onSubmit={this.addGesture}>
+          <input type="text" name="gesturename" id="gesturename"/>
+          <input type="submit" value="Add Gesture" id="addgesturebutton"  />
+        </form>
       </div>
       );
   }
