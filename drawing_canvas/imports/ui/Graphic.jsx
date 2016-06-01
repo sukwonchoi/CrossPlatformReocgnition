@@ -12,6 +12,29 @@ export default class Graphic extends Component{
     this.clickDrag = new Array();
     this.pointArray = new Array();
 
+    var initialseGestureList = new Array();
+    initialseGestureList.push("X");
+    initialseGestureList.push("O");
+
+    this.state = {
+      gestureList : initialseGestureList
+    };
+    
+    this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
+    this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
+    this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
+    this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
+    this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
+    this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
+
+    this.clearCanvas = this.clearCanvas.bind(this);
+    this.addGesture = this.addGesture.bind(this);
+    this.deleteGesture = this.deleteGesture.bind(this);
+    this.getMousePos = this.getMousePos.bind(this);
+    this.getTouchPos = this.getTouchPos.bind(this);
+    this.addClick = this.addClick.bind(this);
+    this.redraw = this.redraw.bind(this);
+
     window.pdollar = new PDollarRecognizer();
     window.pointArray = this.pointArray;
     window.clickX = this.clickX;
@@ -23,21 +46,7 @@ export default class Graphic extends Component{
     window.canvas = this.canvas;
     this.ctx = this.canvas.getContext('2d');
     window.ctx = this.ctx;
-
-    this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
-    this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
-    this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
-    this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
-    this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
-    this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
-
-    this.clearCanvas = this.clearCanvas.bind(this);
-    this.addGesture = this.addGesture.bind(this);
-    this.getMousePos = this.getMousePos.bind(this);
-    this.getTouchPos = this.getTouchPos.bind(this);
-    this.addClick = this.addClick.bind(this);
-    this.redraw = this.redraw.bind(this);
-
+    
     this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
     this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
     window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
@@ -53,8 +62,38 @@ export default class Graphic extends Component{
 
     var form = e.target;
     var gestureName = form.querySelector('[name="gesturename"]').value;
+    
+    let tempGestureList = this.state.gestureList;
+    tempGestureList.push(gestureName);
+    this.setState(
+      {
+        gestureList: tempGestureList
+      }
+    );
 
     window.pdollar.AddGesture(gestureName, pointArray);
+  }
+
+  deleteGesture(e){
+    e.preventDefault();
+
+    var form = e.target;
+    var gestureName = form.querySelector('[name="gesturename"]').value;
+
+    let tempGestureList = this.state.gestureList;
+
+    var index = tempGestureList.indexOf(gestureName);
+
+    if(index != -1)
+        tempGestureList.splice( index, 1 );
+
+    this.setState(
+      {
+        gestureList: tempGestureList
+      }
+    );
+
+    window.pdollar.DeleteUserGestures();
   }
 
   clearCanvas(){
@@ -193,8 +232,23 @@ export default class Graphic extends Component{
         <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
         <form onSubmit={this.addGesture}>
           <input type="text" name="gesturename" id="gesturename"/>
-          <input type="submit" value="Add Gesture" id="addgesturebutton"  />
+          <input type="submit" value="Add Geture" id="addgesturebutton"  />
         </form>
+        <div>
+          <ul>
+            {
+              this.state.gestureList.map(function(name){
+                    return <li key ={name}>
+                              <p>{name}</p>
+                              <form onSubmit={this.deleteGesture}>
+                                <input type="hidden" name="gesturename" id="gesturename" value={name}/>
+                                <input type="submit" value="Delete" />
+                              </form>
+                            </li>;
+                  })
+            }
+          </ul>
+        </div>
       </div>
       );
   }
