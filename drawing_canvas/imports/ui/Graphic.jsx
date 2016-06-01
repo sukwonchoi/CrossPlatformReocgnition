@@ -21,8 +21,10 @@ export default class Graphic extends Component{
 
   componentDidMount(){
     this.canvas = this.refs.context;
-    this.gestureNameTextBox = this.refs.gestureNameTextBox;
+    window.canvas = this.canvas;
+    // this.gestureNameTextBox = this.refs.gestureNameTextBox;
     this.ctx = this.canvas.getContext('2d');
+    window.ctx = this.ctx;
 
     this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
     this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);

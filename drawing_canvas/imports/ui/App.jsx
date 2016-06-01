@@ -14,11 +14,9 @@ export default class App extends Component {
   }
 
   componentDidMount(){
-    requestAnimationFrame(this.tick);
   }
 
   tick(){
-    requestAnimationFrame(this.tick());
   }
 
 
