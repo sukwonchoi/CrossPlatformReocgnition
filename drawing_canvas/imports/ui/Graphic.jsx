@@ -89,6 +89,9 @@ export default class Graphic extends Component{
     this.mouseY = e.pageY - this.canvas.offsetTop;
 
     this.paint = true;
+    this.clickX.push(new Array());
+    this.clickY.push(new Array());
+    this.clickDrag.push(new Array());    
     this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
     this.redraw();
   }
