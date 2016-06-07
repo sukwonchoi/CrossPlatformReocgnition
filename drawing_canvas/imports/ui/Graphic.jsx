@@ -12,18 +12,14 @@ export default class Graphic extends Component{
     this.clickDrag = new Array();
     this.pointArray = new Array();
 
-    window.pdollar = new PDollarRecognizer();
-    window.pointArray = this.pointArray;
-    window.clickX = this.clickX;
-    window.clickY = this.clickY;
-    // window.recognize = 
-  }
+    var initialseGestureList = new Array();
+    initialseGestureList.push("X");
+    initialseGestureList.push("O");
 
-  componentDidMount(){
-    this.canvas = this.refs.context;
-    this.gestureNameTextBox = this.refs.gestureNameTextBox;
-    this.ctx = this.canvas.getContext('2d');
-
+    this.state = {
+      gestureList : initialseGestureList
+    };
+    
     this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
     this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
     this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
@@ -33,11 +29,27 @@ export default class Graphic extends Component{
 
     this.clearCanvas = this.clearCanvas.bind(this);
     this.addGesture = this.addGesture.bind(this);
+    this.deleteGesture = this.deleteGesture.bind(this);
     this.getMousePos = this.getMousePos.bind(this);
     this.getTouchPos = this.getTouchPos.bind(this);
     this.addClick = this.addClick.bind(this);
     this.redraw = this.redraw.bind(this);
 
+    window.pdollar = new PDollarRecognizer();
+    window.pointArray = this.pointArray;
+    window.clickX = this.clickX;
+    window.clickY = this.clickY;
+
+    window.deleteGesture = this.deleteGesture;
+    window.state = this.state;
+  }
+
+  componentDidMount(){
+    this.canvas = this.refs.context;
+    window.canvas = this.canvas;
+    this.ctx = this.canvas.getContext('2d');
+    window.ctx = this.ctx;
+    
     this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
     this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
     window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
@@ -47,10 +59,44 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
-  addGesture(){
+  addGesture(e){
+    e.preventDefault();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // var gestureName = this.gestureNameTextBox.value;
-    window.pdollar.AddGesture("test", pointArray);
+
+    var form = e.target;
+    var gestureName = form.querySelector('[name="gesturename"]').value;
+    
+    let tempGestureList = this.state.gestureList;
+    tempGestureList.push(gestureName);
+    this.setState(
+      {
+        gestureList: tempGestureList
+      }
+    );
+
+    window.pdollar.AddGesture(gestureName, pointArray);
+  }
+
+  deleteGesture(name){
+
+    // e.preventDefault();
+    var gestureName = name;
+    // var gestureName = "asdf";
+    let tempGestureList = this.state.gestureList;
+
+    var index = tempGestureList.indexOf(gestureName);
+
+    if(index != -1)
+        tempGestureList.splice( index, 1 );
+
+
+    this.setState(
+      {
+        gestureList: tempGestureList
+      }
+    );
+
+    window.pdollar.DeleteUserGestures();
   }
 
   clearCanvas(){
@@ -89,6 +135,9 @@ export default class Graphic extends Component{
     this.mouseY = e.pageY - this.canvas.offsetTop;
 
     this.paint = true;
+    this.clickX.push(new Array());
+    this.clickY.push(new Array());
+    this.clickDrag.push(new Array());    
     this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
     this.redraw();
   }
@@ -183,10 +232,50 @@ export default class Graphic extends Component{
     return (
       <div>
         <canvas width={screen.width} height={screen.height - 80} ref="context" />
+
+
         <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
-        <input type="submit" onClick={this.addGesture} value="Add Gesture" id="clearbutton"  />
+        <form onSubmit={this.addGesture}>
+          <input type="text" name="gesturename" id="gesturename"/>
+          <input type="submit" value="Add Geture" id="addgesturebutton"  />
+        </form>
+
+        <ul>
+            {
+              this.state.gestureList.map(function(name){
+                    return <li key ={name}>
+                              {name}
+                              <input type="submit" name={name} value="Delete" onClick={() => this.deleteGesture(name)} />
+                            </li>;
+                  })
+            }
+          </ul>
       </div>
       );
   }
+}
+
+class GestureList extends React.Component{
+
+
+
+
+
+  render(){
+    return(
+      <ul>
+          {this.props.gesture.map(function(name){
+            return (
+            <li key={name}>
+              {name}
+              <input type="submit" value="Delete" onClick={this.props.deleteGesture} />
+            </li>
+            );
+          })
+        }
+      </ul>    
+      );
+  }
+
 }
 
