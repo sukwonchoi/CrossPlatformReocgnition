@@ -13,12 +13,6 @@ export default class App extends Component {
     super();
   }
 
-  componentDidMount(){
-  }
-
-  tick(){
-  }
-
 
   render(){
     return (

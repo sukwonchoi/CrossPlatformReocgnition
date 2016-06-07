@@ -39,6 +39,9 @@ export default class Graphic extends Component{
     window.pointArray = this.pointArray;
     window.clickX = this.clickX;
     window.clickY = this.clickY;
+
+    window.deleteGesture = this.deleteGesture;
+    window.state = this.state;
   }
 
   componentDidMount(){
@@ -74,18 +77,18 @@ export default class Graphic extends Component{
     window.pdollar.AddGesture(gestureName, pointArray);
   }
 
-  deleteGesture(e){
-    e.preventDefault();
+  deleteGesture(name){
 
-    var form = e.target;
-    var gestureName = form.querySelector('[name="gesturename"]').value;
-
+    // e.preventDefault();
+    var gestureName = name;
+    // var gestureName = "asdf";
     let tempGestureList = this.state.gestureList;
 
     var index = tempGestureList.indexOf(gestureName);
 
     if(index != -1)
         tempGestureList.splice( index, 1 );
+
 
     this.setState(
       {
@@ -229,28 +232,50 @@ export default class Graphic extends Component{
     return (
       <div>
         <canvas width={screen.width} height={screen.height - 80} ref="context" />
+
+
         <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
         <form onSubmit={this.addGesture}>
           <input type="text" name="gesturename" id="gesturename"/>
           <input type="submit" value="Add Geture" id="addgesturebutton"  />
         </form>
-        <div>
-          <ul>
+
+        <ul>
             {
               this.state.gestureList.map(function(name){
                     return <li key ={name}>
-                              <p>{name}</p>
-                              <form onSubmit={this.deleteGesture}>
-                                <input type="hidden" name="gesturename" id="gesturename" value={name}/>
-                                <input type="submit" value="Delete" />
-                              </form>
+                              {name}
+                              <input type="submit" name={name} value="Delete" onClick={() => this.deleteGesture(name)} />
                             </li>;
                   })
             }
           </ul>
-        </div>
       </div>
       );
   }
+}
+
+class GestureList extends React.Component{
+
+
+
+
+
+  render(){
+    return(
+      <ul>
+          {this.props.gesture.map(function(name){
+            return (
+            <li key={name}>
+              {name}
+              <input type="submit" value="Delete" onClick={this.props.deleteGesture} />
+            </li>
+            );
+          })
+        }
+      </ul>    
+      );
+  }
+
 }
 
