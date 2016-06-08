@@ -11,6 +11,7 @@ export default class Graphic extends Component{
     this.clickY = new Array();
     this.clickDrag = new Array();
     this.pointArray = new Array();
+    this.color = "#df4b26";
 
     var initialseGestureList = new Array();
     initialseGestureList.push("X");
@@ -34,6 +35,7 @@ export default class Graphic extends Component{
     this.getTouchPos = this.getTouchPos.bind(this);
     this.addClick = this.addClick.bind(this);
     this.redraw = this.redraw.bind(this);
+    this.onColorChange = this.onColorChange.bind(this);
 
     window.pdollar = new PDollarRecognizer();
     window.pointArray = this.pointArray;
@@ -111,7 +113,7 @@ export default class Graphic extends Component{
   redraw(){
     // this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); // Clears the canvas
 
-    this.ctx.strokeStyle = "#df4b26";
+    this.ctx.strokeStyle = this.color;
     this.ctx.lineJoin = "round";
     this.ctx.lineWidth = 5;
 
@@ -227,6 +229,9 @@ export default class Graphic extends Component{
     }
   }
 
+  onColorChange(e){
+  		this.color = e.currentTarget.value;
+  }
 
   render(){
     return (
@@ -239,6 +244,11 @@ export default class Graphic extends Component{
           <input type="text" name="gesturename" id="gesturename"/>
           <input type="submit" value="Add Geture" id="addgesturebutton"  />
         </form>
+        <form action="">
+  			<input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
+  			<input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
+  			<input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
+		</form>
 
         <ul>
             {
