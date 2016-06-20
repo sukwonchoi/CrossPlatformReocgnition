@@ -37,7 +37,8 @@ export default class Graphic extends Component{
     this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
 
-    window.pdollar = new PDollarRecognizer();
+    this.pdollar = new PDollarRecognizer();
+    window.pdollar = this.pdollar 
     window.pointArray = this.pointArray;
     window.clickX = this.clickX;
     window.clickY = this.clickY;
@@ -59,6 +60,10 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
     this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+
   }
 
   addGesture(e){
@@ -81,9 +86,7 @@ export default class Graphic extends Component{
 
   deleteGesture(name){
 
-    // e.preventDefault();
     var gestureName = name;
-    // var gestureName = "asdf";
     let tempGestureList = this.state.gestureList;
 
     var index = tempGestureList.indexOf(gestureName);
@@ -266,10 +269,6 @@ export default class Graphic extends Component{
 }
 
 class GestureList extends React.Component{
-
-
-
-
 
   render(){
     return(
