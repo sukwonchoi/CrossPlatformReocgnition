@@ -37,6 +37,8 @@ export default class Graphic extends Component{
     this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
 
+    this.drawBoard = this.drawBoard.bind(this);
+
     this.pdollar = new PDollarRecognizer();
     window.pdollar = this.pdollar 
     window.pointArray = this.pointArray;
@@ -45,7 +47,10 @@ export default class Graphic extends Component{
 
     window.deleteGesture = this.deleteGesture;
     window.state = this.state;
+
   }
+
+
 
   componentDidMount(){
     this.canvas = this.refs.context;
@@ -61,10 +66,44 @@ export default class Graphic extends Component{
     this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
     this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
 
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
+    this.ctx.canvas.width  = window.innerWidth;
+    this.ctx.canvas.height = window.innerHeight;
 
+    this.drawBoard(this.ctx);
   }
+
+  drawBoard(context){
+
+    context.beginPath();
+    let bw = context.canvas.width;
+    let bh = context.canvas.height;
+
+    let size = 3;
+
+    let wi = bw / size;
+    let hi = bh / size;
+
+    let p = 10;
+
+
+    context.moveTo(wi, 0);
+    context.lineTo(wi, bh);
+    context.moveTo(wi * 2, 0);
+    context.lineTo(wi * 2, bh);
+
+    context.moveTo(0, hi);
+    context.lineTo(bw, hi);
+    context.moveTo(0, hi * 2);
+    context.lineTo(bw, hi * 2);
+
+
+    context.closePath();
+    context.strokeStyle = "black";
+    context.stroke();
+
+    console.log("swag");
+  }
+
 
   addGesture(e){
     e.preventDefault();
