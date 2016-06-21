@@ -36,7 +36,7 @@ export default class Graphic extends Component{
     this.addClick = this.addClick.bind(this);
     this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
-
+    this.getSquareNumber = this.getSquareNumber.bind(this);
     this.drawBoard = this.drawBoard.bind(this);
 
     this.pdollar = new PDollarRecognizer();
@@ -146,10 +146,73 @@ export default class Graphic extends Component{
   clearCanvas(){
     console.log(this.clickX + " " + this.clickY);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    alert("Gesture: " + window.pdollar.Recognize(pointArray).Name + " Score: " + window.pdollar.Recognize(pointArray).Score);
+
+    squareNumber = this.getSquareNumber(this.ctx);
+
+    alert("Gesture: " + window.pdollar.Recognize(pointArray).Name + " At Square: " + squareNumber);
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
+
+    this.drawBoard(this.ctx);
+  }
+
+  getSquareNumber(context){
+
+    let count = this.pointArray.length;
+   
+    console.log(count);
+
+    var x = 0;
+    var y = 0;
+
+    for(var i = 0; i < count; i++){
+      x += pointArray[i].X;
+      y += pointArray[i].Y;  
+    }
+
+    x /= count;
+    y /= count;
+
+    console.log(x);
+    console.log(y);
+
+    let width = context.canvas.width;
+    let height = context.canvas.height;
+
+    if( x < width/3 ){
+        if(y < height/3){
+          return 1;
+        }
+        else if( y < 2 * height/3){
+          return 4;
+        }
+        else{
+          return 7;
+        }
+    }
+    else if ( x < 2 * width/3 ){
+        if(y < height/3){
+          return 2;
+        }
+        else if( y < 2 * height/3){
+          return 5;
+        }
+        else{
+          return 8;
+        }
+    }
+    else{
+        if(y < height/3){
+          return 3;
+        }
+        else if( y < 2 * height/3){
+          return 6;
+        }
+        else{
+          return 9;
+        }
+    }
   }
 
   redraw(){
