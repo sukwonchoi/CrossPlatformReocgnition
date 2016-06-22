@@ -11,11 +11,19 @@ export default class Graphic extends Component{
     this.clickY = new Array();
     this.clickDrag = new Array();
     this.pointArray = new Array();
+
+    // this.board = new Array(9);
+    this.board = [["a", "b", "c"], ["d", "e", "f"], ["g", "h", "i"]];
+    window.board = this.board;
+    this.drawing = false;
+
     this.color = "#df4b26";
 
     var initialseGestureList = new Array();
     initialseGestureList.push("X");
     initialseGestureList.push("O");
+
+
 
     this.state = {
       gestureList : initialseGestureList
@@ -28,6 +36,8 @@ export default class Graphic extends Component{
     this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
     this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
 
+
+    this.addToBoard = this.addToBoard.bind(this);
     this.clearCanvas = this.clearCanvas.bind(this);
     this.addGesture = this.addGesture.bind(this);
     this.deleteGesture = this.deleteGesture.bind(this);
@@ -39,6 +49,8 @@ export default class Graphic extends Component{
     this.getSquareNumber = this.getSquareNumber.bind(this);
     this.drawBoard = this.drawBoard.bind(this);
 
+    this.checkWinLogic = this.checkWinLogic.bind(this);
+
     this.pdollar = new PDollarRecognizer();
     window.pdollar = this.pdollar 
     window.pointArray = this.pointArray;
@@ -47,7 +59,6 @@ export default class Graphic extends Component{
 
     window.deleteGesture = this.deleteGesture;
     window.state = this.state;
-
   }
 
 
@@ -85,7 +96,6 @@ export default class Graphic extends Component{
 
     let p = 10;
 
-
     context.moveTo(wi, 0);
     context.lineTo(wi, bh);
     context.moveTo(wi * 2, 0);
@@ -96,13 +106,11 @@ export default class Graphic extends Component{
     context.moveTo(0, hi * 2);
     context.lineTo(bw, hi * 2);
 
-
     context.closePath();
     context.strokeStyle = "black";
     context.stroke();
-
-    console.log("swag");
   }
+
 
 
   addGesture(e){
@@ -141,6 +149,83 @@ export default class Graphic extends Component{
     );
 
     window.pdollar.DeleteUserGestures();
+  }
+
+  addToBoard(){
+
+    squareNumber = this.getSquareNumber(this.ctx);
+    index = squareNumber - 1;
+
+    n = 3;
+    x = index % n;
+    y = Math.floor(index / n);
+
+    gesture = window.pdollar.Recognize(pointArray).Name;
+
+    alert("Gesture: " + gesture + " At Square: (" + x + ", " + y + ") + " + index);
+
+    // this.board.splice(index, 0, gesture);
+    this.board[x][y] = gesture;  
+    this.checkWinLogic(x, y, gesture);
+
+    this.clickX.length = 0;
+    this.clickY.length = 0;
+    this.pointArray.length = 0;
+  }
+
+  checkWinLogic(x, y, s){
+    for(i = 0; i < n; i++){
+      if(this.board[x][i] != s){
+        break;
+      }
+      if(i == n-1){
+        alert(s + " wins!");
+        console.log(s + "wins!");
+      }
+    }
+
+    //check row
+    for(i = 0; i < n; i++){
+      if(this.board[i][y] != s){
+        break;
+      }
+      if(i == n-1){
+        alert(s + " wins!");
+        console.log(s + "wins!");
+      }
+    }
+
+      //check diag
+    if(x == y){
+      //we're on a diagonal
+      for(i = 0; i < n; i++){
+        if(this.board[i][i] != s){
+          break;
+        }
+        if(i == n-1){
+
+          alert(s + " wins!");
+        console.log(s + "wins!");
+        }
+      }
+    }
+
+            //check anti diag (thanks rampion)
+    for(i = 0;i<n;i++){
+      if(this.board[i][(n-1)-i] != s){
+        break;
+      }
+      if(i == n-1){
+
+        alert(s + " wins!");
+        console.log(s + "wins!");
+      }
+    }
+
+      //check draw
+    if(this.moveCount == (n^2 - 1)){
+      
+    }
   }
 
   clearCanvas(){
@@ -242,6 +327,11 @@ export default class Graphic extends Component{
     this.mouseY = e.pageY - this.canvas.offsetTop;
 
     this.paint = true;
+    if(!this.drawing){
+      this.drawing = true;
+      clearTimeout(this.timeoutHandler);
+    }
+    this.drawing = true;
     this.clickX.push(new Array());
     this.clickY.push(new Array());
     this.clickDrag.push(new Array());    
@@ -252,6 +342,9 @@ export default class Graphic extends Component{
     // Keep track of the mouse button being released
   sketchpad_mouseUp() {
     this.paint = false;
+
+    this.timeoutHandler = setTimeout(this.addToBoard, 600);
+    this.drawing = false;
   }
 
     // Keep track of the mouse position and draw a dot if mouse button is currently pressed
