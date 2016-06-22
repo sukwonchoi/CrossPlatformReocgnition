@@ -96,7 +96,6 @@ export default class Graphic extends Component{
 
     let p = 10;
 
-
     context.moveTo(wi, 0);
     context.lineTo(wi, bh);
     context.moveTo(wi * 2, 0);
@@ -107,11 +106,9 @@ export default class Graphic extends Component{
     context.moveTo(0, hi * 2);
     context.lineTo(bw, hi * 2);
 
-
     context.closePath();
     context.strokeStyle = "black";
     context.stroke();
-
   }
 
 
@@ -332,7 +329,7 @@ export default class Graphic extends Component{
     this.paint = true;
     if(!this.drawing){
       this.drawing = true;
-      window.clearTimeout(this.timeoutHandler);
+      clearTimeout(this.timeoutHandler);
     }
     this.drawing = true;
     this.clickX.push(new Array());
@@ -346,7 +343,7 @@ export default class Graphic extends Component{
   sketchpad_mouseUp() {
     this.paint = false;
 
-    this.timeoutHandler = window.setTimeout(this.addToBoard, 600);
+    this.timeoutHandler = setTimeout(this.addToBoard, 600);
     this.drawing = false;
   }
 
