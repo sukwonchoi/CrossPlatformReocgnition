@@ -22,3 +22,5 @@ insecure                # Allow all DB writes from clients (for prototyping)
 semantic:ui
 flemay:less-autoprefixer
 semantic:ui-css
+mdg:camera
+arboleya:electrify
