@@ -19,6 +19,8 @@ export default class Graphic extends Component{
     this.heightOfDrawnBoard = 0;
     this.minXOfDrawnBoard = 0;
     this.minYOfDrawnBoard = 0;
+    this.moveCount = 0;
+    this.lastGesture = "";
 
     this.boardDrawn = false;
 
@@ -141,15 +143,41 @@ export default class Graphic extends Component{
 
     gesture = window.pdollar.Recognize(pointArray).Name;
 
-    // this.board.splice(index, 0, gesture);
+    if(this.lastGesture == gesture){
+      this.drawBoardAndBeautifiedGestures();
+      this.clickX.length = 0;
+      this.clickY.length = 0;
+      this.pointArray.length = 0;
+      alert("Not your turn!");
+      return;
+    }
+
+    if(this.board[x][y] == "O" || this.board[x][y] == "X"){
+      this.drawBoardAndBeautifiedGestures();
+      alert("Please choose another slot!");
+      return;
+    }
+
     this.board[x][y] = gesture;  
-    this.checkWinLogic(x, y, gesture);
+    var won = this.checkWinLogic(x, y, gesture);
 
     this.drawBoardAndBeautifiedGestures();
 
+    this.lastGesture = gesture;
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
+
+    if(won){
+      this.clearCanvas();
+    }
+    else{
+      this.moveCount = this.moveCount + 1;
+      if(this.moveCount == 9){
+        alert("It's a tie!");
+        this.clearCanvas();
+      }
+    }
   }
 
   drawBoardAndBeautifiedGestures(){
@@ -210,6 +238,7 @@ export default class Graphic extends Component{
   }
 
   checkWinLogic(x, y, s){
+  
     for(i = 0; i < n; i++){
       if(this.board[x][i] != s){
         break;
@@ -217,6 +246,7 @@ export default class Graphic extends Component{
       if(i == n-1){
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
@@ -228,6 +258,7 @@ export default class Graphic extends Component{
       if(i == n-1){
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
@@ -239,9 +270,9 @@ export default class Graphic extends Component{
           break;
         }
         if(i == n-1){
-
           alert(s + " wins!");
-        console.log(s + "wins!");
+          console.log(s + "wins!");
+          return true;
         }
       }
     }
@@ -255,31 +286,28 @@ export default class Graphic extends Component{
 
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
-      //check draw
-    if(this.moveCount == (n^2 - 1)){
-      
-    }
+    return false;
   }
 
   clearCanvas(){
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    squareNumber = this.getSquareNumber(this.ctx);
+    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+    this.lastGesture = "";
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
     this.boardDrawn = false;
-
     this.boardLinesX.length = 0;
     this.boardLinesY.length = 0;
-
     this.widthOfDrawnBoard = 0;
     this.heightOfDrawnBoard = 0;
     this.minXOfDrawnBoard = 0;
     this.minYOfDrawnBoard = 0;
+    this.moveCount = 0;
   }
 
   getSquareNumber(context){
@@ -304,17 +332,9 @@ export default class Graphic extends Component{
     let height = this.heightOfDrawnBoard;
     let xMin = this.minXOfDrawnBoard;
     let yMin = this.minYOfDrawnBoard;
-
-    console.log("Width:" + width);
-    console.log("Height:" + height);
-    console.log("xMin:" + xMin);
-    console.log("yMin:" + yMin);
-
+    
     x = x - xMin;
     y = y - yMin;
-
-    console.log("AFter add X:" + x);
-    console.log("After add Y:" + y);
 
     if( x < width/3 ){
         if(y < height/3){
@@ -524,7 +544,8 @@ export default class Graphic extends Component{
       }
 
       this.drawing = false;
-      return;    }
+      return;    
+    }
 
     this.timeoutHandler = setTimeout(this.addToBoard, 600);
     this.drawing = false;
@@ -573,8 +594,6 @@ export default class Graphic extends Component{
         var touch = e.touches[0]; // Get the information for finger #1
         this.touchX=touch.pageX-touch.target.offsetLeft;
         this.touchY=touch.pageY-touch.target.offsetTop;
-        //
-        //<input type="text" id="gestureName" ref="gestureNameTextBox" placeholder="Gesture Name" />
       }
     }
   }
