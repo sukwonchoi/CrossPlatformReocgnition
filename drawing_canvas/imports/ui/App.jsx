@@ -3,10 +3,18 @@ import ApplicationBar from './ApplicationBar.jsx'
 
 // App component - represents the whole app
 
-export const App = ( { children } ) => (
+export default class App extends React.Component {
 
-  <div className="ui container">
-    { children }
-  </div>
-)
+	componentDidMount(){
+		window.children = this.props.children;
+	}
+  render () {
+    return (
+      <div>
+      	<ApplicationBar title="tic tac toe"/>
+        {this.props.children}
+      </div>
+    )
+  }
+}
 

@@ -16,7 +16,7 @@ export default class ApplicationBar extends Component{
 render(){
   return (
       <AppBar
-        title="Tic Tac Toe"
+        title={this.props.title}
         iconElementRight={
           <IconMenu 
              iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
