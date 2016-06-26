@@ -57,8 +57,8 @@ export default class Graphic extends Component{
     this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.getSquareNumber = this.getSquareNumber.bind(this);
-    this.drawBoard = this.drawBoard.bind(this);
     this.beautifyBoard = this.beautifyBoard.bind(this);
+    this.drawBoardAndBeautifiedGestures = this.drawBoardAndBeautifiedGestures.bind(this);
 
     this.checkWinLogic = this.checkWinLogic.bind(this);
 
@@ -90,39 +90,7 @@ export default class Graphic extends Component{
 
     this.ctx.canvas.width  = window.innerWidth;
     this.ctx.canvas.height = window.innerHeight;
-
-    //this.drawBoard(this.ctx);
   }
-
-  drawBoard(context){
-
-    context.beginPath();
-    let bw = context.canvas.width;
-    let bh = context.canvas.height;
-
-    let size = 3;
-
-    let wi = bw / size;
-    let hi = bh / size;
-
-    let p = 10;
-
-    context.moveTo(wi, 0);
-    context.lineTo(wi, bh);
-    context.moveTo(wi * 2, 0);
-    context.lineTo(wi * 2, bh);
-
-    context.moveTo(0, hi);
-    context.lineTo(bw, hi);
-    context.moveTo(0, hi * 2);
-    context.lineTo(bw, hi * 2);
-
-    context.closePath();
-    context.strokeStyle = "black";
-    context.stroke();
-  }
-
-
 
   addGesture(e){
     e.preventDefault();
@@ -173,15 +141,72 @@ export default class Graphic extends Component{
 
     gesture = window.pdollar.Recognize(pointArray).Name;
 
-    alert("Gesture: " + gesture + " At Square: (" + x + ", " + y + ") + " + index);
-
     // this.board.splice(index, 0, gesture);
     this.board[x][y] = gesture;  
     this.checkWinLogic(x, y, gesture);
 
+    this.drawBoardAndBeautifiedGestures();
+
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
+  }
+
+  drawBoardAndBeautifiedGestures(){
+    xMin = this.minXOfDrawnBoard;
+    yMin = this.minYOfDrawnBoard;
+
+    context = this.ctx;
+    
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.beginPath();
+
+    let bw = this.widthOfDrawnBoard;
+    let bh = this.heightOfDrawnBoard;
+
+    let size = 3;
+
+    let wi = bw / size;
+    let hi = bh / size;
+
+    context.moveTo(wi     + xMin, 0   + yMin);
+    context.lineTo(wi     + xMin, bh  + yMin);
+    context.moveTo(wi * 2 + xMin, 0   + yMin);
+    context.lineTo(wi * 2 + xMin, bh  + yMin);
+
+    context.moveTo(0  + xMin, hi      + yMin);
+    context.lineTo(bw + xMin, hi      + yMin);
+    context.moveTo(0  + xMin, hi * 2  + yMin);
+    context.lineTo(bw + xMin, hi * 2  + yMin);
+
+    context.closePath();
+    context.strokeStyle = "black";
+    context.stroke();    
+
+    for(var x = 0; x < 3; x++){
+      for(var y = 0; y < 3; y++){
+
+        var centerX = xMin + (wi/2) + (wi * x);
+        var centerY = yMin + (hi/2) + (hi * y);
+        var radius = Math.min(wi, hi) / 3;
+        context.beginPath();
+        if(this.board[x][y] == "O"){
+          context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+        }
+        else if(this.board[x][y] == "X"){
+          context.moveTo(centerX - radius, centerY - radius);
+          context.lineTo(centerX + radius, centerY + radius);
+          context.moveTo(centerX + radius, centerY - radius);
+          context.lineTo(centerX - radius, centerY + radius);
+        }
+        context.strokeStyle = this.color;
+        context.lineJoin = "round";
+        context.lineWidth = 5;
+        context.closePath();
+        context.stroke();
+      }
+    }
+
   }
 
   checkWinLogic(x, y, s){
@@ -240,12 +265,9 @@ export default class Graphic extends Component{
   }
 
   clearCanvas(){
-    console.log(this.clickX + " " + this.clickY);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     squareNumber = this.getSquareNumber(this.ctx);
-
-    alert("Gesture: " + window.pdollar.Recognize(pointArray).Name + " At Square: " + squareNumber);
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
@@ -258,8 +280,6 @@ export default class Graphic extends Component{
     this.heightOfDrawnBoard = 0;
     this.minXOfDrawnBoard = 0;
     this.minYOfDrawnBoard = 0;
-
-    //this.drawBoard(this.ctx);
   }
 
   getSquareNumber(context){
@@ -392,9 +412,6 @@ export default class Graphic extends Component{
 
     if(!this.boardDrawn){
       if(this.boardLinesX.length == 4){
-
-        alert("Board Drawn");
-
         this.beautifyBoard();
         this.boardDrawn = true;
       }
@@ -502,9 +519,6 @@ export default class Graphic extends Component{
   sketchpad_touchEnd() {
     if(!this.boardDrawn){
       if(this.boardLinesX.length == 4){
-
-        alert("Board Drawn");
-
         this.beautifyBoard();
         this.boardDrawn = true;
       }
