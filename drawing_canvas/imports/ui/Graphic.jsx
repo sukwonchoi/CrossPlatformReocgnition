@@ -12,6 +12,18 @@ export default class Graphic extends Component{
     this.clickDrag = new Array();
     this.pointArray = new Array();
 
+    this.boardLinesX = new Array();
+    this.boardLinesY = new Array();
+
+    this.widthOfDrawnBoard = 0;
+    this.heightOfDrawnBoard = 0;
+    this.minXOfDrawnBoard = 0;
+    this.minYOfDrawnBoard = 0;
+    this.moveCount = 0;
+    this.lastGesture = "";
+
+    this.boardDrawn = false;
+
     // this.board = new Array(9);
     this.board = [["a", "b", "c"], ["d", "e", "f"], ["g", "h", "i"]];
     window.board = this.board;
@@ -47,7 +59,8 @@ export default class Graphic extends Component{
     this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.getSquareNumber = this.getSquareNumber.bind(this);
-    this.drawBoard = this.drawBoard.bind(this);
+    this.beautifyBoard = this.beautifyBoard.bind(this);
+    this.drawBoardAndBeautifiedGestures = this.drawBoardAndBeautifiedGestures.bind(this);
 
     this.checkWinLogic = this.checkWinLogic.bind(this);
 
@@ -79,39 +92,7 @@ export default class Graphic extends Component{
 
     this.ctx.canvas.width  = window.innerWidth;
     this.ctx.canvas.height = window.innerHeight;
-
-    this.drawBoard(this.ctx);
   }
-
-  drawBoard(context){
-
-    context.beginPath();
-    let bw = context.canvas.width;
-    let bh = context.canvas.height;
-
-    let size = 3;
-
-    let wi = bw / size;
-    let hi = bh / size;
-
-    let p = 10;
-
-    context.moveTo(wi, 0);
-    context.lineTo(wi, bh);
-    context.moveTo(wi * 2, 0);
-    context.lineTo(wi * 2, bh);
-
-    context.moveTo(0, hi);
-    context.lineTo(bw, hi);
-    context.moveTo(0, hi * 2);
-    context.lineTo(bw, hi * 2);
-
-    context.closePath();
-    context.strokeStyle = "black";
-    context.stroke();
-  }
-
-
 
   addGesture(e){
     e.preventDefault();
@@ -162,18 +143,102 @@ export default class Graphic extends Component{
 
     gesture = window.pdollar.Recognize(pointArray).Name;
 
-    alert("Gesture: " + gesture + " At Square: (" + x + ", " + y + ") + " + index);
+    if(this.lastGesture == gesture){
+      this.drawBoardAndBeautifiedGestures();
+      this.clickX.length = 0;
+      this.clickY.length = 0;
+      this.pointArray.length = 0;
+      alert("Not your turn!");
+      return;
+    }
 
-    // this.board.splice(index, 0, gesture);
+    if(this.board[x][y] == "O" || this.board[x][y] == "X"){
+      this.drawBoardAndBeautifiedGestures();
+      alert("Please choose another slot!");
+      return;
+    }
+
     this.board[x][y] = gesture;  
-    this.checkWinLogic(x, y, gesture);
+    var won = this.checkWinLogic(x, y, gesture);
 
+    this.drawBoardAndBeautifiedGestures();
+
+    this.lastGesture = gesture;
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
+
+    if(won){
+      this.clearCanvas();
+    }
+    else{
+      this.moveCount = this.moveCount + 1;
+      if(this.moveCount == 9){
+        alert("It's a tie!");
+        this.clearCanvas();
+      }
+    }
+  }
+
+  drawBoardAndBeautifiedGestures(){
+    xMin = this.minXOfDrawnBoard;
+    yMin = this.minYOfDrawnBoard;
+
+    context = this.ctx;
+    
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.beginPath();
+
+    let bw = this.widthOfDrawnBoard;
+    let bh = this.heightOfDrawnBoard;
+
+    let size = 3;
+
+    let wi = bw / size;
+    let hi = bh / size;
+
+    context.moveTo(wi     + xMin, 0   + yMin);
+    context.lineTo(wi     + xMin, bh  + yMin);
+    context.moveTo(wi * 2 + xMin, 0   + yMin);
+    context.lineTo(wi * 2 + xMin, bh  + yMin);
+
+    context.moveTo(0  + xMin, hi      + yMin);
+    context.lineTo(bw + xMin, hi      + yMin);
+    context.moveTo(0  + xMin, hi * 2  + yMin);
+    context.lineTo(bw + xMin, hi * 2  + yMin);
+
+    context.closePath();
+    context.strokeStyle = "black";
+    context.stroke();    
+
+    for(var x = 0; x < 3; x++){
+      for(var y = 0; y < 3; y++){
+
+        var centerX = xMin + (wi/2) + (wi * x);
+        var centerY = yMin + (hi/2) + (hi * y);
+        var radius = Math.min(wi, hi) / 3;
+        context.beginPath();
+        if(this.board[x][y] == "O"){
+          context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+        }
+        else if(this.board[x][y] == "X"){
+          context.moveTo(centerX - radius, centerY - radius);
+          context.lineTo(centerX + radius, centerY + radius);
+          context.moveTo(centerX + radius, centerY - radius);
+          context.lineTo(centerX - radius, centerY + radius);
+        }
+        context.strokeStyle = this.color;
+        context.lineJoin = "round";
+        context.lineWidth = 5;
+        context.closePath();
+        context.stroke();
+      }
+    }
+
   }
 
   checkWinLogic(x, y, s){
+  
     for(i = 0; i < n; i++){
       if(this.board[x][i] != s){
         break;
@@ -181,6 +246,7 @@ export default class Graphic extends Component{
       if(i == n-1){
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
@@ -192,6 +258,7 @@ export default class Graphic extends Component{
       if(i == n-1){
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
@@ -203,9 +270,9 @@ export default class Graphic extends Component{
           break;
         }
         if(i == n-1){
-
           alert(s + " wins!");
-        console.log(s + "wins!");
+          console.log(s + "wins!");
+          return true;
         }
       }
     }
@@ -219,34 +286,33 @@ export default class Graphic extends Component{
 
         alert(s + " wins!");
         console.log(s + "wins!");
+        return true;
       }
     }
 
-      //check draw
-    if(this.moveCount == (n^2 - 1)){
-      
-    }
+    return false;
   }
 
   clearCanvas(){
-    console.log(this.clickX + " " + this.clickY);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    squareNumber = this.getSquareNumber(this.ctx);
-
-    alert("Gesture: " + window.pdollar.Recognize(pointArray).Name + " At Square: " + squareNumber);
+    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+    this.lastGesture = "";
     this.clickX.length = 0;
     this.clickY.length = 0;
     this.pointArray.length = 0;
-
-    this.drawBoard(this.ctx);
+    this.boardDrawn = false;
+    this.boardLinesX.length = 0;
+    this.boardLinesY.length = 0;
+    this.widthOfDrawnBoard = 0;
+    this.heightOfDrawnBoard = 0;
+    this.minXOfDrawnBoard = 0;
+    this.minYOfDrawnBoard = 0;
+    this.moveCount = 0;
   }
 
   getSquareNumber(context){
 
     let count = this.pointArray.length;
-   
-    console.log(count);
 
     var x = 0;
     var y = 0;
@@ -259,11 +325,16 @@ export default class Graphic extends Component{
     x /= count;
     y /= count;
 
-    console.log(x);
-    console.log(y);
+    console.log("X:" + x);
+    console.log("Y:" + y);
 
-    let width = context.canvas.width;
-    let height = context.canvas.height;
+    let width = this.widthOfDrawnBoard;
+    let height = this.heightOfDrawnBoard;
+    let xMin = this.minXOfDrawnBoard;
+    let yMin = this.minYOfDrawnBoard;
+    
+    x = x - xMin;
+    y = y - yMin;
 
     if( x < width/3 ){
         if(y < height/3){
@@ -294,7 +365,7 @@ export default class Graphic extends Component{
         else if( y < 2 * height/3){
           return 6;
         }
-        else{
+        else{ 
           return 9;
         }
     }
@@ -307,16 +378,26 @@ export default class Graphic extends Component{
     this.ctx.lineJoin = "round";
     this.ctx.lineWidth = 5;
 
-    var currentStroke = this.clickX.length - 1;
-    var currentDot = this.clickX[currentStroke].length - 1;
+    if(this.boardDrawn){
+      var currentStroke = this.clickX.length - 1;
+      var currentDot = this.clickX[currentStroke].length - 1;
 
-    this.ctx.beginPath();
-    if(this.clickDrag[currentStroke][currentDot] && currentDot){
-      this.ctx.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
-    }else{
-      this.ctx.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
+      this.ctx.beginPath();
+      if(this.clickDrag[currentStroke][currentDot] && currentDot){
+        this.ctx.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
+      }else{
+        this.ctx.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
+      }
+      this.ctx.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
     }
-    this.ctx.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
+    else{
+      var currentStroke = this.boardLinesX.length - 1;
+      var currentDot = this.boardLinesX[currentStroke].length - 1;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.boardLinesX[currentStroke][currentDot-1], this.boardLinesY[currentStroke][currentDot-1]);
+      this.ctx.lineTo(this.boardLinesX[currentStroke][currentDot], this.boardLinesY[currentStroke][currentDot]);
+    }
     this.ctx.closePath();
     this.ctx.stroke();
   }
@@ -325,16 +406,22 @@ export default class Graphic extends Component{
   sketchpad_mouseDown(e) {
     this.mouseX = e.pageX - this.canvas.offsetLeft;
     this.mouseY = e.pageY - this.canvas.offsetTop;
-
     this.paint = true;
-    if(!this.drawing){
+    
+    if(this.boardDrawn){
+      if(!this.drawing){
+        this.drawing = true;
+        clearTimeout(this.timeoutHandler);
+      }
       this.drawing = true;
-      clearTimeout(this.timeoutHandler);
+      this.clickX.push(new Array());
+      this.clickY.push(new Array());
+      this.clickDrag.push(new Array());
     }
-    this.drawing = true;
-    this.clickX.push(new Array());
-    this.clickY.push(new Array());
-    this.clickDrag.push(new Array());    
+    else{
+      this.boardLinesX.push(new Array());
+      this.boardLinesY.push(new Array());    
+    }
     this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
     this.redraw();
   }
@@ -343,8 +430,63 @@ export default class Graphic extends Component{
   sketchpad_mouseUp() {
     this.paint = false;
 
+    if(!this.boardDrawn){
+      if(this.boardLinesX.length == 4){
+        this.beautifyBoard();
+        this.boardDrawn = true;
+      }
+
+      this.drawing = false;
+      return;
+    }
+
     this.timeoutHandler = setTimeout(this.addToBoard, 600);
     this.drawing = false;
+  }
+
+  beautifyBoard(){
+
+    var xArray = this.boardLinesX[0].concat(this.boardLinesX[1], this.boardLinesX[2], this.boardLinesX[3]);
+    var yArray = this.boardLinesY[0].concat(this.boardLinesY[1], this.boardLinesY[2], this.boardLinesY[3]);
+
+
+    var xMax = Math.max.apply(Math, xArray);
+    var xMin = Math.min.apply(Math, xArray);
+    var yMax = Math.max.apply(Math, yArray);
+    var yMin = Math.min.apply(Math, yArray);
+
+    this.minXOfDrawnBoard = xMin;
+    this.minYOfDrawnBoard = yMin;
+    this.heightOfDrawnBoard = yMax - yMin;
+    this.widthOfDrawnBoard = xMax - xMin;
+
+    context = this.ctx;
+    
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.beginPath();
+
+
+    let bw = xMax - xMin;
+    let bh = yMax - yMin;
+
+    let size = 3;
+
+    let wi = bw / size;
+    let hi = bh / size;
+
+    context.moveTo(wi     + xMin, 0   + yMin);
+    context.lineTo(wi     + xMin, bh  + yMin);
+    context.moveTo(wi * 2 + xMin, 0   + yMin);
+    context.lineTo(wi * 2 + xMin, bh  + yMin);
+
+    context.moveTo(0  + xMin, hi      + yMin);
+    context.lineTo(bw + xMin, hi      + yMin);
+    context.moveTo(0  + xMin, hi * 2  + yMin);
+    context.lineTo(bw + xMin, hi * 2  + yMin);
+
+    context.closePath();
+    context.strokeStyle = "black";
+    context.stroke();
   }
 
     // Keep track of the mouse position and draw a dot if mouse button is currently pressed
@@ -374,26 +516,47 @@ export default class Graphic extends Component{
     this.getTouchPos();
     this.paint = true;
 
-    this.clickX.push(new Array());
-    this.clickY.push(new Array());
-    this.clickDrag.push(new Array());
+    if(this.boardDrawn){
+      if(!this.drawing){
+        this.drawing = true;
+        clearTimeout(this.timeoutHandler);
+      }
+      this.drawing = true;
+      this.clickX.push(new Array());
+      this.clickY.push(new Array());
+      this.clickDrag.push(new Array());
+    }
+    else{
+      this.boardLinesX.push(new Array());
+      this.boardLinesY.push(new Array());    
+    }
+
     this.addClick(this.touchX, this.touchY, true);
     this.redraw();
 
     event.preventDefault();
   }
   sketchpad_touchEnd() {
-    this.paint = false;
+    if(!this.boardDrawn){
+      if(this.boardLinesX.length == 4){
+        this.beautifyBoard();
+        this.boardDrawn = true;
+      }
+
+      this.drawing = false;
+      return;    
+    }
+
+    this.timeoutHandler = setTimeout(this.addToBoard, 600);
+    this.drawing = false;
   }
 
   sketchpad_touchMove(e) { 
-      this.getTouchPos();
+    this.getTouchPos();
 
-      if(this.paint){
-        this.addClick(this.touchX, this.touchY, true);
-        this.redraw(); 
-      }
     if(this.paint){
+      this.addClick(this.touchX, this.touchY, true);
+      this.redraw(); 
     }
 
     event.preventDefault();
@@ -401,15 +564,25 @@ export default class Graphic extends Component{
 
   addClick(x, y, dragging)
   {
-    var currentStroke = this.clickX.length - 1;
+    if(this.boardDrawn){
+      var currentStroke = this.clickX.length - 1;
 
-    this.clickX[currentStroke].push(x);
-    this.clickY[currentStroke].push(y);
-    if(!isNaN(x) && !isNaN(y)){
-      var point = new Point(x, y, 2);
-      this.pointArray.push(point);
+      this.clickX[currentStroke].push(x);
+      this.clickY[currentStroke].push(y);
+      if(!isNaN(x) && !isNaN(y)){
+        var point = new Point(x, y, 2);
+        this.pointArray.push(point);
+      }
+      this.clickDrag[currentStroke].push(dragging);
     }
-    this.clickDrag[currentStroke].push(dragging);
+    else{
+      var currentStroke = this.boardLinesX.length - 1;
+
+      if(!isNaN(x) && !isNaN(y)){
+        this.boardLinesX[currentStroke].push(x);
+        this.boardLinesY[currentStroke].push(y);
+      }
+    }
   }
 
   getTouchPos(e) {
@@ -421,8 +594,6 @@ export default class Graphic extends Component{
         var touch = e.touches[0]; // Get the information for finger #1
         this.touchX=touch.pageX-touch.target.offsetLeft;
         this.touchY=touch.pageY-touch.target.offsetTop;
-        //
-        //<input type="text" id="gestureName" ref="gestureNameTextBox" placeholder="Gesture Name" />
       }
     }
   }
