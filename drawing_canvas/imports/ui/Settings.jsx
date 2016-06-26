@@ -14,6 +14,22 @@ export default class Settings extends Component{
 
 	}
 	
+	// render(){
+	// 	return(
+	// 		<div className="ui container">
+	// 			<div className="ui vertical accordion menu">
+	// 				<div className="item">
+	// 					<a className="active title">
+	// 						<i className="dropdown icon"></i>
+	// 						Color
+	// 					</a>
+	// 				</div>		
+	// 			</div>
+	// 		</div>
+	// 		);
+	// }		
+
+
 	render(){
 	    return (
 	    	<div className="ui container">
@@ -50,13 +66,14 @@ export default class Settings extends Component{
 					<div className="ui form">
 						<div className="grouped fields">
 							<div className="ui field">
-								<div className="ui toggle read-only checkbox">
+								<div className="ui toggle checkbox">
 		 		 					<input type="checkbox" checked="checked" name="public" />
 		  						<label>X</label>
+		  						<i class="remove circle icon"></i>
 								</div>
 							</div>
 							<div className="ui field">
-								<div className="ui toggle read-only checkbox">
+								<div className="ui toggle checkbox">
 		  						<input type="checkbox" checked="checked" name="public" />
 		  						<label>O</label>
 								</div>
