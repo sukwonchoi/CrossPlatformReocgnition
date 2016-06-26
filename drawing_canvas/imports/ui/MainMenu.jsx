@@ -15,12 +15,7 @@ export default class MainMenu extends Component{
 
 	render(){
 	    return (
-	      <div>
-	      	
-   	<ApplicationBar />
 	      	<Graphic />
-
-	      </div>
 	    );
 	}
 }
