@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { IndexLink, Link } from 'react-router';
 
 import TitleStore from '../../client/stores/TitleStore.js';
+import * as TitleActions from '../../client/actions/TitleActions.js';
 
 import AppBar from 'material-ui/AppBar';
+import Drawer from 'material-ui/Drawer';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -18,6 +20,8 @@ export default class ApplicationBar extends Component{
     this.state = {
       title: TitleStore.getTitle(),
     };
+
+    this._toggle = this._toggle.bind(this);
   }
   componentWillMount(){
     TitleStore.on("change", () =>{
@@ -32,10 +36,23 @@ export default class ApplicationBar extends Component{
     TitleStore.setTitle(title);
   }
 
+  _toggle(e){
+    e.preventDefault()
+    console.log("toggle");
+    this.refs.leftNav.toggle();
+  }
+
+
 render(){
+  var menuItems = [
+    { route: 'home', text: 'Home' },
+    { route: 'about', text: 'About' },
+  ];
   return (
+    <div>
       <AppBar
         title={this.state.title}
+        onLeftIconButtonTouchTap={this._toggle}
         iconElementRight={
           <IconMenu 
              iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
@@ -48,6 +65,8 @@ render(){
           </IconMenu>
         }
       />
+      <Drawer ref="leftNav" docked={false} menuItems={menuItems} />
+    </div>
     );
     }
 }
