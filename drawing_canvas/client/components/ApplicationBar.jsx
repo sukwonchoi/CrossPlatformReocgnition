@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { IndexLink, Link } from 'react-router';
 
-import TitleStore from '../../client/stores/TitleStore.js';
-import * as TitleActions from '../../client/actions/TitleActions.js';
+import TitleStore from '../stores/TitleStore.js';
+import * as TitleActions from '../actions/TitleActions.js'
 
 import AppBar from 'material-ui/AppBar';
 import Drawer from 'material-ui/Drawer';
