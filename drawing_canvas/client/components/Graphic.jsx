@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
-import $ from 'jquery';
 
 export default class Graphic extends Component{
 

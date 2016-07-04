@@ -2,11 +2,11 @@ import React from 'react';
 import { Meteor } from 'meteor/meteor';
 import { render } from 'react-dom';
 
-import App from '../imports/ui/App.jsx';
-import MainMenu from '../imports/ui/MainMenu.jsx';
-import Graph from '../imports/ui/Graph.jsx'
-import Graphic from '../imports/ui/Graphic.jsx';
-import Settings from '../imports/ui/Settings.jsx';
+import App from './components/App.jsx';
+import MainMenu from './components/MainMenu.jsx';
+import Graph from './components/Graph.jsx'
+import Graphic from './components/Graphic.jsx';
+import Settings from './components/Settings.jsx';
 
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -14,8 +14,6 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { Router, Route, IndexRoute, browswerHistory } from 'react-router';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
-
-
 
 injectTapEventPlugin();
 
