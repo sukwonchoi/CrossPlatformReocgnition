@@ -1,17 +1,70 @@
 import React, { Component } from 'react';
 import { IndexLink, Link } from 'react-router';
 
+import InkStore from '../stores/InkStore.js';
+import * as InkActions from '../actions/InkActions.js'
+
+import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import FlatButton from 'material-ui/FlatButton';
 
 export default class Settings extends Component{
 
 	constructor(){
 		super();
-
+		this.inkHandler = this.inkHandler.bind(this);
+		console.log("constructor");
+    this.state = {
+      colour: InkStore.getColour(),
+    };
 	}
+
 
 	componentDidMount(){
 		$('.ui.radio.checkbox').checkbox();
 
+		switch(this.state.colour){
+			case "#000000":
+				$('.ui.radio.checkbox.black').checkbox('check');
+				break;
+			case "#0000FF":
+				$('.ui.radio.checkbox.blue').checkbox('check');
+				console.log("asdfd");
+				break;
+			case "#df4b26":
+				$('.ui.radio.checkbox.red').checkbox('check');
+				console.log("asdfd");
+				break;
+		}
+
+		$('.ui.radio.checkbox.black')
+			.checkbox()
+			.first().checkbox({
+				onChecked: function() {
+					console.log("black");
+					InkStore.setColour("#000000");
+				}
+		});
+		$('.ui.radio.checkbox.blue')
+			.checkbox()
+			.first().checkbox({
+				onChecked: function() {
+					console.log("blue");
+					InkStore.setColour("#0000FF");
+				}
+		});
+		$('.ui.radio.checkbox.red')
+			.checkbox()
+			.first().checkbox({
+				onChecked: function() {
+					console.log("red");
+					InkStore.setColour("#df4b26");
+				}
+		});	
+	}
+
+	inkHandler(colour){
+    console.log(colour);
+	  InkStore.setColour(colour)
 	}
 	
 	// render(){
@@ -39,19 +92,19 @@ export default class Settings extends Component{
 	    		<div className="ui form">
 			    	<div className="grouped fields">
 			    		<div className="ui field">
-	 	 	  				<div className="ui radio checkbox">
+	 	 	  				<div className="ui radio checkbox black">
 	 	   						<input type="radio" name="color" checked="" tabindex="0" class="hidden"/>
  	   							<label>Black</label>
 								</div>
 			    		</div>
 			    		<div className="ui field">
-		  	  			<div className="ui radio checkbox">
+		  	  			<div className="ui radio checkbox blue">
 		    						<input type="radio" name="color" checked="" tabindex="0" class="hidden"/>
  	 	  							<label color="blue">Blue</label>
 								</div>
 			    		</div>
 			    		<div className="ui field">
-		  	  			<div className="ui radio checkbox">
+		  	  			<div className="ui radio checkbox red">
 		    						<input type="radio" name="color" checked="" tabindex="0" class="hidden"/>
  	 	  							<label color="red">Red</label>
 								</div>
@@ -84,6 +137,5 @@ export default class Settings extends Component{
 
 	    );
 	}
-
 
 }

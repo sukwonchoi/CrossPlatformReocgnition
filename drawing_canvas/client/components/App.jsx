@@ -11,7 +11,7 @@ export default class App extends React.Component {
   render () {
     return (
       <div>
-      	<ApplicationBar title="tic tac toe"/>
+      	<ApplicationBar/>
         {this.props.children}
       </div>
     )
