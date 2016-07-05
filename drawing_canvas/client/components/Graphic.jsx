@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
 
+
+import InkStore from '../stores/InkStore.js';
+
 export default class Graphic extends Component{
 
   constructor(props){
@@ -28,7 +31,9 @@ export default class Graphic extends Component{
     window.board = this.board;
     this.drawing = false;
 
-    this.color = "#df4b26";
+    this.color = InkStore.getColour();
+    console.log(InkStore.getColour());
+    window.color = this.color;
 
     var initialseGestureList = new Array();
     initialseGestureList.push("X");
@@ -73,7 +78,13 @@ export default class Graphic extends Component{
     window.state = this.state;
   }
 
-
+  componentWillMount(){
+    InkStore.on("change", () =>{
+      this.setState({
+        title: TitleStore.getColour(),
+      });
+    })
+  }
 
   componentDidMount(){
     this.canvas = this.refs.context;
