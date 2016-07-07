@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 class InkStore extends EventEmitter{
 	constructor(){
 		super();
-		this.colour = "#df4b26";
+		this.colour = "#000000";
 		console.log("INK STORE CONSTRUCTOR");
 	}
 

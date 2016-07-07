@@ -119,7 +119,7 @@ export default class Graphic extends Component{
       }
     );
 
-    window.pdollar.AddGesture(gestureName, pointArray);
+    this.pdollar.AddGesture(gestureName, pointArray);
   }
 
   deleteGesture(name){
@@ -139,7 +139,7 @@ export default class Graphic extends Component{
       }
     );
 
-    window.pdollar.DeleteUserGestures();
+    this.pdollar.DeleteUserGestures();
   }
 
   addToBoard(){
@@ -151,7 +151,7 @@ export default class Graphic extends Component{
     x = index % n;
     y = Math.floor(index / n);
 
-    gesture = window.pdollar.Recognize(pointArray).Name;
+    gesture = this.pdollar.Recognize(pointArray).Name;
 
     if(this.lastGesture == gesture){
       this.drawBoardAndBeautifiedGestures();

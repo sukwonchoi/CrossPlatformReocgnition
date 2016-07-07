@@ -6,7 +6,6 @@ import ApplicationBar from './ApplicationBar.jsx'
 export default class App extends React.Component {
 
 	componentDidMount(){
-		window.children = this.props.children;
 	}
   render () {
     return (

@@ -18,21 +18,32 @@ export default class Settings extends Component{
     };
 	}
 
+  componentWillUnmount () {
+    // allows us to ignore an inflight request in scenario 4
+    console.log("component unmounting settings")
+  }
+
 
 	componentDidMount(){
-		$('.ui.radio.checkbox').checkbox();
+		// this.setState(
+		// 		{
+		// 			colour: InkStore.getColour(),
+		// 		}
+		// 	);
 
+		// console.log(InkStore.getColour());
+			console.log("component did mount?")
+		$('.ui.radio.checkbox').checkbox();
 		switch(this.state.colour){
+		// switch(InkStore.getColour()){
 			case "#000000":
 				$('.ui.radio.checkbox.black').checkbox('check');
 				break;
 			case "#0000FF":
 				$('.ui.radio.checkbox.blue').checkbox('check');
-				console.log("asdfd");
 				break;
 			case "#df4b26":
 				$('.ui.radio.checkbox.red').checkbox('check');
-				console.log("asdfd");
 				break;
 		}
 
