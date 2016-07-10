@@ -45,6 +45,8 @@ export default class Graphic extends Component{
       gestureList : initialseGestureList
     };
     
+
+    //events
     this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
     this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
     this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
