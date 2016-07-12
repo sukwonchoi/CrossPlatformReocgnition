@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
-
+import RecognitionCanvas from './RecognitionCanvas.jsx'
 
 import InkStore from '../stores/InkStore.js';
 
@@ -71,13 +71,14 @@ export default class Graphic extends Component{
     this.checkWinLogic = this.checkWinLogic.bind(this);
 
     this.pdollar = new PDollarRecognizer();
-    window.pdollar = this.pdollar 
-    window.pointArray = this.pointArray;
-    window.clickX = this.clickX;
-    window.clickY = this.clickY;
+    window.pdollar = this.pdollar
 
-    window.deleteGesture = this.deleteGesture;
-    window.state = this.state;
+    this.test = this.test.bind(this);
+  }
+
+  test(){
+    this.recognitionCanvas.undo();
+    this.recognitionCanvas.clearCanvas();
   }
 
   componentWillMount(){
@@ -89,21 +90,23 @@ export default class Graphic extends Component{
   }
 
   componentDidMount(){
+    this.recognitionCanvas = this.refs.canvas;
+
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
-    this.ctx = this.canvas.getContext('2d');
-    window.ctx = this.ctx;
+    // this.ctx = this.canvas.getContext('2d');
+    // window.ctx = this.ctx;
     
-    this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
-    this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
-    window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
+    // this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
+    // this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
+    // window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
 
-    this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
-    this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
-    this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+    // this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
+    // this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
+    // this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
 
-    this.ctx.canvas.width  = window.innerWidth;
-    this.ctx.canvas.height = window.innerHeight;
+    // this.ctx.canvas.width  = window.innerWidth;
+    // this.ctx.canvas.height = window.innerHeight;
   }
 
   addGesture(e){
@@ -438,7 +441,7 @@ export default class Graphic extends Component{
     this.redraw();
   }
 
-    // Keep track of the mouse button being released
+  // Keep track of the mouse button being released
   sketchpad_mouseUp() {
     this.paint = false;
 
@@ -613,14 +616,14 @@ export default class Graphic extends Component{
   onColorChange(e){
   		this.color = e.currentTarget.value;
   }
-
+//<canvas width={screen.width} height={screen.height - 80} ref="context" />
+  
   render(){
     return (
       <div>
-        <canvas width={screen.width} height={screen.height - 80} ref="context" />
 
-
-        <input type="submit" onClick={this.clearCanvas} value="Clear Sketchpad" id="clearbutton"  />
+        <RecognitionCanvas ref="canvas"/>
+        <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
         <form onSubmit={this.addGesture}>
           <input type="text" name="gesturename" id="gesturename"/>
           <input type="submit" value="Add Geture" id="addgesturebutton"  />
