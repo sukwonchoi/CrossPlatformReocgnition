@@ -90,7 +90,10 @@ export default class Graphic extends Component{
   }
 
   componentDidMount(){
-    this.recognitionCanvas = this.refs.canvas;
+
+    console.log("WTF3");
+
+    this.recognitionCanvas = this.refs.recognitionCanvas;
 
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
@@ -622,7 +625,7 @@ export default class Graphic extends Component{
     return (
       <div>
 
-        <RecognitionCanvas ref="canvas"/>
+        <RecognitionCanvas ref="recognitionCanvas"/>
         <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
         <form onSubmit={this.addGesture}>
           <input type="text" name="gesturename" id="gesturename"/>

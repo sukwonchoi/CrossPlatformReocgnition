@@ -143,7 +143,7 @@ var AngleSimilarityThreshold = Deg2Rad(30.0);
 //
 // NDollarRecognizer class
 //
-function NDollarRecognizer(useBoundedRotationInvariance) // constructor
+export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 {
 	//
 	// one predefined multistroke for each multistroke type
