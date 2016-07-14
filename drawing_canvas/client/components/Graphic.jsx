@@ -51,15 +51,14 @@ export default class Graphic extends Component{
     this.recognitionCanvas.undo();
     this.recognitionCanvas.clearCanvas();
   }
-
   
   dollarP(){
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
   }
+
   dollarN(){
     this.recognitionCanvas.setRecognitionAlgorithm("$n");
   }
-
 
   componentWillMount(){
     InkStore.on("change", () =>{
@@ -76,6 +75,17 @@ export default class Graphic extends Component{
 
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
+    
+    // this.ctx = this.canvas.getContext('2d');
+    // window.ctx = this.ctx;
+    
+    // this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
+    // this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
+    // window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
+
+    // this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
+    // this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
+    // this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
   doLogic(shape){
