@@ -85,14 +85,13 @@ export default class Graphic extends Component{
     this.recognitionCanvas.clearCanvas();
   }
 
-
   dollarP(){
     this.recognitionCanvas.recognize('$p');
   }
-  dollarN(){
-    this.recognitionCanvas('$n');
-  }
 
+  dollarN(){
+    console.log(this.recognitionCanvas.recognize('$n'));
+  }
 
   componentWillMount(){
     InkStore.on("change", () =>{
@@ -108,6 +107,7 @@ export default class Graphic extends Component{
 
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
+    
     // this.ctx = this.canvas.getContext('2d');
     // window.ctx = this.ctx;
     

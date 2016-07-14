@@ -28,12 +28,6 @@ export default class RecognitionCanvas extends Component{
 		this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
 		this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
 
-		this.clickX = new Array();
-		this.clickY = new Array();
-
-		window.clickX = this.clickX;
-		window.strokes = this.strokes;
-
 		this.addClick = this.addClick.bind(this);
 		this.redraw = this.redraw.bind(this);
 
@@ -65,9 +59,9 @@ export default class RecognitionCanvas extends Component{
 
 	recognize(recognition){
 		if(recognition == '$p')
-			return $P.Recognize(points);
+			return this.$P.Recognize(this.points);
 		else if(recognition == "$n")
-			return $N.Recognize()
+			return this.$N.Recognize(this.strokes);
 
 		// function(strokes, useBoundedRotationInvariance, requireSameNoOfStrokes, useProtractor)
 	}
@@ -93,8 +87,6 @@ export default class RecognitionCanvas extends Component{
 
 	clearCanvas(){
 	    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	    this.clickX.length = 0;
-	    this.clickY.length = 0;
 	    this.strokes.length = 0;
 	    this.pointArray.length = 0;
 	    this.moveCount = 0;
@@ -105,12 +97,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	addClick(x, y){
-		// var currentStroke = this.clickX.length - 1;
-
 		var currentStroke = this.strokes.length - 1;
-		
-		this.clickX[currentStroke].push(x);
-		this.clickY[currentStroke].push(y);
 
 		if(!isNaN(x) && !isNaN(y)){
 			var point = new Point(x, y, currentStroke);
@@ -124,9 +111,6 @@ export default class RecognitionCanvas extends Component{
 		this.context.lineJoin = "round";
 		this.context.lineWidth = 5;
 
-		// var currentStroke = this.clickX.length - 1;
-		// var currentDot = this.clickX[currentStroke].length - 1;
-
 		var currentStroke = this.strokes.length - 1;
 		var currentDot = this.strokes[currentStroke].length - 1;
 
@@ -139,14 +123,6 @@ export default class RecognitionCanvas extends Component{
 		}
 		this.context.lineTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y);
 
-		// if(currentDot){
-		// 	this.context.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
-		// }else{
-		// 	this.context.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
-		// }
-
-		// this.context.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
-
 		this.context.closePath();
 		this.context.stroke();
 	}
@@ -154,15 +130,10 @@ export default class RecognitionCanvas extends Component{
 	sketchpad_mouseDown(e){
 		this.mouseX = e.pageX - this.canvas.offsetLeft;
 		this.mouseY = e.pageY - this.canvas.offsetTop;
+
 		this.paint = true;
 
 		this.strokes.push(new Array());
-
-		this.clickX.push(new Array());
-		this.clickY.push(new Array());
-
-		window.clickx = this.clickX
-		window.clicky = this.clickY
 
 		this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
 		this.redraw();
@@ -172,25 +143,21 @@ export default class RecognitionCanvas extends Component{
     if(this.paint){
 			this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop);
 			this.redraw();
-    }
+		}
 	}
 
 	sketchpad_mouseUp(e){
     	this.paint = false;
-    	this.timeoutHandler = setTimeout(this.addToBoard, 600);
 	}
 
 	sketchpad_touchStart(e){
 		this.getTouchPos();
-    	this.paint = true;
+		this.paint = true;
 
-    	this.clickX.push(new Array());
-    	this.clickY.push(new Array());
+		this.addClick(this.touchX, this.touchY, true);
+		this.redraw();
 
-    	this.addClick(this.touchX, this.touchY, true);
-    	this.redraw();
-
-    	e.preventDefault();
+		e.preventDefault();
 	}
 
 	sketchpad_touchMove(e){
@@ -204,7 +171,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	sketchpad_touchEnd(e){
-		this.timeoutHandler = setTimeout(this.addToBoard, 600);
+
 	}
 
 	getTouchPos(e){
