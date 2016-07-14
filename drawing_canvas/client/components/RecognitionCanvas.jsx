@@ -21,7 +21,7 @@ export default class RecognitionCanvas extends Component{
 		//$N stroke array
 		this.strokes = new Array();
 
-		//Recognition algorithm
+		//Recognition settings
 		this.recognitionAlgorithm = "";
 		this.recognitionTime = 600;
 		this.recognitionListener = null;
@@ -91,12 +91,13 @@ export default class RecognitionCanvas extends Component{
 		this.recognitionListener = listener;
 	}
 
-	addGesture(name, points){
-		$P.AddGesture(name, points);
+	addGesture(name){
+		$P.AddGesture(name, this.pointArray);
+		this.clearCanvas();
 	}
 
-	deleteGesture(){
-
+	deleteGesture(name){
+		//TODO: Delete logic
 	}
 
 	shapeDetected(shape){
@@ -142,7 +143,7 @@ export default class RecognitionCanvas extends Component{
 			this.strokes[currentStroke].push(point);
 			this.pointArray.push(point);
 		}
-  }
+  	}
 
 	redraw(){
 		this.context.strokeStyle = this.color;
