@@ -21,6 +21,11 @@ export default class RecognitionCanvas extends Component{
 		//$N stroke array
 		this.strokes = new Array();
 
+		//Recognition settings
+		this.recognitionAlgorithm = "";
+		this.recognitionTime = 600;
+		this.recognitionListener = null;
+
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
 		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
 		this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
@@ -38,6 +43,9 @@ export default class RecognitionCanvas extends Component{
 		this.addGesture = this.addGesture.bind(this);
 		this.deleteGesture = this.deleteGesture.bind(this);
 		this.shapeDetected = this.shapeDetected.bind(this);
+		this.setRecognitionAlgorithm = this.setRecognitionAlgorithm.bind(this);
+		this.setRecognitionTime = this.setRecognitionTime.bind(this);
+		this.setRecognitionListener = this.setRecognitionListener.bind(this);
 
 	}
 
@@ -57,31 +65,48 @@ export default class RecognitionCanvas extends Component{
 		this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
 	}
 
-	recognize(recognition){
-		if(recognition == '$p')
-			return this.$P.Recognize(this.points);
+	recognize(){
+		if(this.recognitionAlgorithm == '$p')
+			this.shapeDetected(this.$P.Recognize(this.pointArray).Name);
 		else if(recognition == "$n")
-			return this.$N.Recognize(this.strokes);
-
-		// function(strokes, useBoundedRotationInvariance, requireSameNoOfStrokes, useProtractor)
+			this.shapeDetected(this.$N.Recognize());
 	}
 	
-	addGesture(name, points){
-		$P.AddGesture(name, points);
+	setRecognitionAlgorithm(recognitionAlgorithm){
+		this.recognitionAlgorithm = recognitionAlgorithm;
 	}
 
-	deleteGesture(){
+	setRecognitionTime(time){
+		this.recognitionTime = time;
+	}
 
+	setRecognitionListener(listener){
+		this.recognitionListener = listener;
+	}
+
+	addGesture(name){
+		$P.AddGesture(name, this.pointArray);
+		this.clearCanvas();
+	}
+
+	deleteGesture(name){
+		//TODO: Delete logic
 	}
 
 	shapeDetected(shape){
 		console.log(shape);
+		this.recognitionListener(shape);
 	}
 
 	undo(){
 
 	}
+	
 	redo(){
+
+	}
+
+	delete(numberOfStrokesAgo){
 
 	}
 
@@ -104,7 +129,7 @@ export default class RecognitionCanvas extends Component{
 			this.strokes[currentStroke].push(point);
 			this.pointArray.push(point);
 		}
-  }
+  	}
 
 	redraw(){
 		this.context.strokeStyle = this.color;
@@ -122,7 +147,8 @@ export default class RecognitionCanvas extends Component{
 			this.context.moveTo(this.strokes[currentStroke][currentDot].X - 1, this.strokes[currentStroke][currentDot].Y)
 		}
 		this.context.lineTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y);
-
+		
+		
 		this.context.closePath();
 		this.context.stroke();
 	}
@@ -148,6 +174,7 @@ export default class RecognitionCanvas extends Component{
 
 	sketchpad_mouseUp(e){
     	this.paint = false;
+    	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
 	}
 
 	sketchpad_touchStart(e){
@@ -171,7 +198,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	sketchpad_touchEnd(e){
-
+		this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
 	}
 
 	getTouchPos(e){
@@ -182,10 +209,6 @@ export default class RecognitionCanvas extends Component{
 			this.touchX=touch.pageX-touch.target.offsetLeft;
 			this.touchY=touch.pageY-touch.target.offsetTop;
 		}
-	}
-
-	addToBoard(){
-		this.shapeDetected(this.localPDollar.Recognize(pointArray).Name);
 	}
 
 	render(){

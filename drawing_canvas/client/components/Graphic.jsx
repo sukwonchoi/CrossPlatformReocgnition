@@ -8,12 +8,6 @@ export default class Graphic extends Component{
 
   constructor(props){
     super(props);
-    this.mouseDown = 0;
-    this.clickX = new Array();
-    this.clickY = new Array();
-    this.clickDrag = new Array();
-    window.point = new Point(1,2,3);
-    this.pointArray = new Array();
 
     this.boardLinesX = new Array();
     this.boardLinesY = new Array();
@@ -35,62 +29,35 @@ export default class Graphic extends Component{
     this.color = InkStore.getColour();
     console.log(InkStore.getColour());
     window.color = this.color;
-
-    var initialseGestureList = new Array();
-    initialseGestureList.push("X");
-    initialseGestureList.push("O");
-
-
-
-    this.state = {
-      gestureList : initialseGestureList
-    };
     
-
-    //events
-    this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
-    this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
-    this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
-    this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
-    this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
-    this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
-
-
     this.addToBoard = this.addToBoard.bind(this);
-    this.clearCanvas = this.clearCanvas.bind(this);
     this.addGesture = this.addGesture.bind(this);
     this.deleteGesture = this.deleteGesture.bind(this);
-    this.getMousePos = this.getMousePos.bind(this);
-    this.getTouchPos = this.getTouchPos.bind(this);
-    this.addClick = this.addClick.bind(this);
-    this.redraw = this.redraw.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.getSquareNumber = this.getSquareNumber.bind(this);
     this.beautifyBoard = this.beautifyBoard.bind(this);
     this.drawBoardAndBeautifiedGestures = this.drawBoardAndBeautifiedGestures.bind(this);
 
     this.checkWinLogic = this.checkWinLogic.bind(this);
-
-    this.pdollar = new PDollarRecognizer();
-    window.pdollar = this.pdollar
-
     this.test = this.test.bind(this);
 
     this.dollarP = this.dollarP.bind(this);
     this.dollarN = this.dollarN.bind(this);
+
+    this.doLogic = this.doLogic.bind(this);
   }
 
   test(){
     this.recognitionCanvas.undo();
     this.recognitionCanvas.clearCanvas();
   }
-
+  
   dollarP(){
-    this.recognitionCanvas.recognize('$p');
+    this.recognitionCanvas.setRecognitionAlgorithm("$p");
   }
 
   dollarN(){
-    console.log(this.recognitionCanvas.recognize('$n'));
+    this.recognitionCanvas.setRecognitionAlgorithm("$n");
   }
 
   componentWillMount(){
@@ -102,8 +69,9 @@ export default class Graphic extends Component{
   }
 
   componentDidMount(){
-
     this.recognitionCanvas = this.refs.recognitionCanvas;
+    this.recognitionCanvas.setRecognitionAlgorithm("$p");
+    this.recognitionCanvas.setRecognitionListener(this.doLogic);
 
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
@@ -118,48 +86,24 @@ export default class Graphic extends Component{
     // this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
     // this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
     // this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+  }
 
-    // this.ctx.canvas.width  = window.innerWidth;
-    // this.ctx.canvas.height = window.innerHeight;
+  doLogic(shape){
+    console.log("recognized " + shape);
   }
 
   addGesture(e){
     e.preventDefault();
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     var form = e.target;
     var gestureName = form.querySelector('[name="gesturename"]').value;
-    
-    let tempGestureList = this.state.gestureList;
-    tempGestureList.push(gestureName);
-    this.setState(
-      {
-        gestureList: tempGestureList
-      }
-    );
-
-    this.pdollar.AddGesture(gestureName, pointArray);
+    this.recognitionCanvas.addGesture(gestureName);
   }
 
   deleteGesture(name){
-
     var gestureName = name;
-    let tempGestureList = this.state.gestureList;
-
-    var index = tempGestureList.indexOf(gestureName);
-
-    if(index != -1)
-        tempGestureList.splice( index, 1 );
-
-
-    this.setState(
-      {
-        gestureList: tempGestureList
-      }
-    );
-
-    this.pdollar.DeleteUserGestures();
+    this.recognitionCanvas.deleteGesture(gestureName);
   }
+
 
   addToBoard(){
 
@@ -322,23 +266,6 @@ export default class Graphic extends Component{
     return false;
   }
 
-  clearCanvas(){
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
-    this.lastGesture = "";
-    this.clickX.length = 0;
-    this.clickY.length = 0;
-    this.pointArray.length = 0;
-    this.boardDrawn = false;
-    this.boardLinesX.length = 0;
-    this.boardLinesY.length = 0;
-    this.widthOfDrawnBoard = 0;
-    this.heightOfDrawnBoard = 0;
-    this.minXOfDrawnBoard = 0;
-    this.minYOfDrawnBoard = 0;
-    this.moveCount = 0;
-  }
-
   getSquareNumber(context){
 
     let count = this.pointArray.length;
@@ -400,79 +327,6 @@ export default class Graphic extends Component{
     }
   }
 
-  redraw(){
-    // this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); // Clears the canvas
-
-    this.ctx.strokeStyle = this.color;
-    this.ctx.lineJoin = "round";
-    this.ctx.lineWidth = 5;
-
-    if(this.boardDrawn){
-      var currentStroke = this.clickX.length - 1;
-      var currentDot = this.clickX[currentStroke].length - 1;
-
-      this.ctx.beginPath();
-      if(this.clickDrag[currentStroke][currentDot] && currentDot){
-        this.ctx.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
-      }else{
-        this.ctx.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
-      }
-      this.ctx.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
-    }
-    else{
-      var currentStroke = this.boardLinesX.length - 1;
-      var currentDot = this.boardLinesX[currentStroke].length - 1;
-
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.boardLinesX[currentStroke][currentDot-1], this.boardLinesY[currentStroke][currentDot-1]);
-      this.ctx.lineTo(this.boardLinesX[currentStroke][currentDot], this.boardLinesY[currentStroke][currentDot]);
-    }
-    this.ctx.closePath();
-    this.ctx.stroke();
-  }
-
-  // Keep track of the mouse button being pressed and draw a dot at current location
-  sketchpad_mouseDown(e) {
-    this.mouseX = e.pageX - this.canvas.offsetLeft;
-    this.mouseY = e.pageY - this.canvas.offsetTop;
-    this.paint = true;
-    
-    if(this.boardDrawn){
-      if(!this.drawing){
-        this.drawing = true;
-        clearTimeout(this.timeoutHandler);
-      }
-      this.drawing = true;
-      this.clickX.push(new Array());
-      this.clickY.push(new Array());
-      this.clickDrag.push(new Array());
-    }
-    else{
-      this.boardLinesX.push(new Array());
-      this.boardLinesY.push(new Array());    
-    }
-    this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-    this.redraw();
-  }
-
-  // Keep track of the mouse button being released
-  sketchpad_mouseUp() {
-    this.paint = false;
-
-    if(!this.boardDrawn){
-      if(this.boardLinesX.length == 4){
-        this.beautifyBoard();
-        this.boardDrawn = true;
-      }
-
-      this.drawing = false;
-      return;
-    }
-
-    this.timeoutHandler = setTimeout(this.addToBoard, 600);
-    this.drawing = false;
-  }
-
   beautifyBoard(){
 
     var xArray = this.boardLinesX[0].concat(this.boardLinesX[1], this.boardLinesX[2], this.boardLinesX[3]);
@@ -518,124 +372,14 @@ export default class Graphic extends Component{
     context.stroke();
   }
 
-    // Keep track of the mouse position and draw a dot if mouse button is currently pressed
-  sketchpad_mouseMove(e) { 
-    if(this.paint){
-      this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop, true);
-      this.redraw();
-    }
-  }
-
-  getMousePos(e) {
-      if (!e)
-          var e = event;
-
-      if (e.offsetX) {
-          this.mouseX = e.offsetX;
-          this.mouseY = e.offsetY;
-      }
-      else if (e.layerX) {
-          this.mouseX = e.layerX;
-          this.mouseY = e.layerY;
-      }
-   }
-
-  // Draw something when a touch start is detected
-  sketchpad_touchStart() {
-    this.getTouchPos();
-    this.paint = true;
-
-    if(this.boardDrawn){
-      if(!this.drawing){
-        this.drawing = true;
-        clearTimeout(this.timeoutHandler);
-      }
-      this.drawing = true;
-      this.clickX.push(new Array());
-      this.clickY.push(new Array());
-      this.clickDrag.push(new Array());
-    }
-    else{
-      this.boardLinesX.push(new Array());
-      this.boardLinesY.push(new Array());    
-    }
-
-    this.addClick(this.touchX, this.touchY, true);
-    this.redraw();
-
-    event.preventDefault();
-  }
-  sketchpad_touchEnd() {
-    if(!this.boardDrawn){
-      if(this.boardLinesX.length == 4){
-        this.beautifyBoard();
-        this.boardDrawn = true;
-      }
-
-      this.drawing = false;
-      return;    
-    }
-
-    this.timeoutHandler = setTimeout(this.addToBoard, 600);
-    this.drawing = false;
-  }
-
-  sketchpad_touchMove(e) { 
-    this.getTouchPos();
-
-    if(this.paint){
-      this.addClick(this.touchX, this.touchY, true);
-      this.redraw(); 
-    }
-
-    event.preventDefault();
-  }
-
-  addClick(x, y, dragging)
-  {
-    if(this.boardDrawn){
-      var currentStroke = this.clickX.length - 1;
-
-      this.clickX[currentStroke].push(x);
-      this.clickY[currentStroke].push(y);
-      if(!isNaN(x) && !isNaN(y)){
-        var point = new Point(x, y, 2);
-        this.pointArray.push(point);
-      }
-      this.clickDrag[currentStroke].push(dragging);
-    }
-    else{
-      var currentStroke = this.boardLinesX.length - 1;
-
-      if(!isNaN(x) && !isNaN(y)){
-        this.boardLinesX[currentStroke].push(x);
-        this.boardLinesY[currentStroke].push(y);
-      }
-    }
-  }
-
-  getTouchPos(e) {
-    if (!e)
-        var e = event;
-
-    if(e.touches) {
-      if (e.touches.length == 1) { // Only deal with one finger
-        var touch = e.touches[0]; // Get the information for finger #1
-        this.touchX=touch.pageX-touch.target.offsetLeft;
-        this.touchY=touch.pageY-touch.target.offsetTop;
-      }
-    }
-  }
 
   onColorChange(e){
   		this.color = e.currentTarget.value;
   }
-//<canvas width={screen.width} height={screen.height - 80} ref="context" />
-  
+
   render(){
     return (
       <div>
-
         <RecognitionCanvas ref="recognitionCanvas"/>
         <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
 
@@ -647,12 +391,15 @@ export default class Graphic extends Component{
           <input type="submit" value="Add Geture" id="addgesturebutton"  />
         </form>
         <form action="">
-  			<input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
-  			<input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
-  			<input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
-		</form>
+    			<input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
+    			<input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
+    			<input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
+ 		    </form>      
+      </div>
+      );
 
-        <ul>
+    /*
+      <ul>
             {
               this.state.gestureList.map(function(name){
                     return <li key ={name}>
@@ -662,8 +409,7 @@ export default class Graphic extends Component{
                   })
             }
           </ul>
-      </div>
-      );
+    */
   }
 }
 
