@@ -12,6 +12,7 @@ export default class Graphic extends Component{
     this.clickX = new Array();
     this.clickY = new Array();
     this.clickDrag = new Array();
+    window.point = new Point(1,2,3);
     this.pointArray = new Array();
 
     this.boardLinesX = new Array();
@@ -74,12 +75,24 @@ export default class Graphic extends Component{
     window.pdollar = this.pdollar
 
     this.test = this.test.bind(this);
+
+    this.dollarP = this.dollarP.bind(this);
+    this.dollarN = this.dollarN.bind(this);
   }
 
   test(){
     this.recognitionCanvas.undo();
     this.recognitionCanvas.clearCanvas();
   }
+
+
+  dollarP(){
+    this.recognitionCanvas.recognize('$p');
+  }
+  dollarN(){
+    this.recognitionCanvas('$n');
+  }
+
 
   componentWillMount(){
     InkStore.on("change", () =>{
@@ -90,8 +103,6 @@ export default class Graphic extends Component{
   }
 
   componentDidMount(){
-
-    console.log("WTF3");
 
     this.recognitionCanvas = this.refs.recognitionCanvas;
 
@@ -627,6 +638,10 @@ export default class Graphic extends Component{
 
         <RecognitionCanvas ref="recognitionCanvas"/>
         <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
+
+        <input type="submit" onClick={this.dollarP} value="$P" id="clearbutton"  />
+        <input type="submit" onClick={this.dollarN} value="$N" id="clearbutton"  />
+
         <form onSubmit={this.addGesture}>
           <input type="text" name="gesturename" id="gesturename"/>
           <input type="submit" value="Add Geture" id="addgesturebutton"  />
