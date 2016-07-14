@@ -1,31 +1,41 @@
 import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
-
+import { NDollarRecognizer } from './NDollar.js'
 
 import InkStore from '../stores/InkStore.js';
+
 
 export default class RecognitionCanvas extends Component{
 
 	constructor(props){
 		super(props);
 
-		//Recognizer
-		this.localPDollar = new PDollarRecognizer();
+		//Recognizers
+		this.$P = new PDollarRecognizer();
+		this.$N = new NDollarRecognizer(true);
+		window.n = this.$N;
+		
+		//$P point array
+		this.pointArray = new Array();
+
+		//$N stroke array
+		this.strokes = new Array();
 
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
-   		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
-    	this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
-    	this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
-    	this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
-    	this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
+		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
+		this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
+		this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
+		this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
+		this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
 
 		this.clickX = new Array();
 		this.clickY = new Array();
-		this.clickDrag = new Array();
-		this.pointArray = new Array();
 
-    	this.addClick = this.addClick.bind(this);
-    	this.redraw = this.redraw.bind(this);
+		window.clickX = this.clickX;
+		window.strokes = this.strokes;
+
+		this.addClick = this.addClick.bind(this);
+		this.redraw = this.redraw.bind(this);
 
 		this.undo = this.undo.bind(this);
 		this.redo = this.redo.bind(this);
@@ -34,6 +44,7 @@ export default class RecognitionCanvas extends Component{
 		this.addGesture = this.addGesture.bind(this);
 		this.deleteGesture = this.deleteGesture.bind(this);
 		this.shapeDetected = this.shapeDetected.bind(this);
+
 	}
 
 	componentWillMount(){
@@ -41,24 +52,30 @@ export default class RecognitionCanvas extends Component{
 
 	componentDidMount(){
 		this.canvas = this.refs.canvas;
-		window.canvas = this.canvas;
 		this.context = this.canvas.getContext('2d');
 
 		this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
 		this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
-	    this.canvas.addEventListener('mouseup', this.sketchpad_mouseUp, false);
+		this.canvas.addEventListener('mouseup', this.sketchpad_mouseUp, false);
 
-	    this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
-	    this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
-	    this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+		this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
+		this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
+		this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
 	}
 
-	recognize(points){
-		return $P.Recognize(points);
+	recognize(recognition){
+		if(recognition == '$p')
+			return $P.Recognize(points);
+		else if(recognition == "$n")
+			return $N.Recognize()
+
+		// function(strokes, useBoundedRotationInvariance, requireSameNoOfStrokes, useProtractor)
 	}
+	
 	addGesture(name, points){
 		$P.AddGesture(name, points);
 	}
+
 	deleteGesture(){
 
 	}
@@ -68,7 +85,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	undo(){
-		console.log("UNDOOO ");
+
 	}
 	redo(){
 
@@ -78,6 +95,7 @@ export default class RecognitionCanvas extends Component{
 	    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	    this.clickX.length = 0;
 	    this.clickY.length = 0;
+	    this.strokes.length = 0;
 	    this.pointArray.length = 0;
 	    this.moveCount = 0;
 	}
@@ -86,62 +104,75 @@ export default class RecognitionCanvas extends Component{
 		this.color = color;
 	}
 
-	addClick(x, y, dragging){
-		var currentStroke = this.clickX.length - 1;
+	addClick(x, y){
+		// var currentStroke = this.clickX.length - 1;
+
+		var currentStroke = this.strokes.length - 1;
 		
 		this.clickX[currentStroke].push(x);
 		this.clickY[currentStroke].push(y);
 
 		if(!isNaN(x) && !isNaN(y)){
-			var point = new Point(x, y, 2);
+			var point = new Point(x, y, currentStroke);
+			this.strokes[currentStroke].push(point);
 			this.pointArray.push(point);
 		}
-
-		this.clickDrag[currentStroke].push(dragging);
-  	}
+  }
 
 	redraw(){
 		this.context.strokeStyle = this.color;
-    	this.context.lineJoin = "round";
-    	this.context.lineWidth = 5;
+		this.context.lineJoin = "round";
+		this.context.lineWidth = 5;
 
-	    var currentStroke = this.clickX.length - 1;
-	    var currentDot = this.clickX[currentStroke].length - 1;
+		// var currentStroke = this.clickX.length - 1;
+		// var currentDot = this.clickX[currentStroke].length - 1;
 
-	    this.context.beginPath();
-		if(this.clickDrag[currentStroke][currentDot] && currentDot){
-			this.context.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
+		var currentStroke = this.strokes.length - 1;
+		var currentDot = this.strokes[currentStroke].length - 1;
+
+		this.context.beginPath();
+		
+		if(currentDot){
+			this.context.moveTo(this.strokes[currentStroke][currentDot-1].X, this.strokes[currentStroke][currentDot-1].Y);
 		}else{
-			this.context.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
+			this.context.moveTo(this.strokes[currentStroke][currentDot].X - 1, this.strokes[currentStroke][currentDot].Y)
 		}
-		this.context.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
+		this.context.lineTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y);
+
+		// if(currentDot){
+		// 	this.context.moveTo(this.clickX[currentStroke][currentDot-1], this.clickY[currentStroke][currentDot-1]);
+		// }else{
+		// 	this.context.moveTo(this.clickX[currentStroke][currentDot]-1, this.clickY[currentStroke][currentDot]);
+		// }
+
+		// this.context.lineTo(this.clickX[currentStroke][currentDot], this.clickY[currentStroke][currentDot]);
 
 		this.context.closePath();
 		this.context.stroke();
 	}
 
-
-
 	sketchpad_mouseDown(e){
 		this.mouseX = e.pageX - this.canvas.offsetLeft;
-	    this.mouseY = e.pageY - this.canvas.offsetTop;
-	    this.paint = true;
-	    
-	    console.log("FUCK U");
+		this.mouseY = e.pageY - this.canvas.offsetTop;
+		this.paint = true;
 
-	    this.clickX.push(new Array());
-	    this.clickY.push(new Array());
-		this.clickDrag.push(new Array());
+		this.strokes.push(new Array());
 
-	    this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-	    this.redraw();
+		this.clickX.push(new Array());
+		this.clickY.push(new Array());
+
+		window.clickx = this.clickX
+		window.clicky = this.clickY
+
+		this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+		this.redraw();
 	}
 
 	sketchpad_mouseMove(e){
-    	if(this.paint){
-			this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop, true);
+    if(this.paint){
+			this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop);
 			this.redraw();
-    	}
+    }
 	}
 
 	sketchpad_mouseUp(e){
@@ -155,7 +186,6 @@ export default class RecognitionCanvas extends Component{
 
     	this.clickX.push(new Array());
     	this.clickY.push(new Array());
-    	this.clickDrag.push(new Array());
 
     	this.addClick(this.touchX, this.touchY, true);
     	this.redraw();
@@ -164,10 +194,10 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	sketchpad_touchMove(e){
-    	this.getTouchPos();
+		this.getTouchPos();
 
-    	if(this.paint){
-      	this.addClick(this.touchX, this.touchY, true);
+		if(this.paint){
+			this.addClick(this.touchX, this.touchY, true);
 			this.redraw();
 		}
 		e.preventDefault();
