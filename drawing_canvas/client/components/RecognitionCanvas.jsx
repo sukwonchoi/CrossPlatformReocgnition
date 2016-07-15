@@ -26,6 +26,9 @@ export default class RecognitionCanvas extends Component{
 		this.recognitionTime = 600;
 		this.recognitionListener = null;
 
+		//Timeout for stroke bundling into a single gesture
+		this.timeoutHandler = null;
+
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
 		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
 		this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
@@ -67,7 +70,7 @@ export default class RecognitionCanvas extends Component{
 
 	recognize(){
 		if(this.recognitionAlgorithm == '$p')
-			this.shapeDetected(this.$P.Recognize(this.pointArray).Name);
+			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score);
 		else if(recognition == "$n")
 			this.shapeDetected(this.$N.Recognize());
 	}
@@ -93,9 +96,9 @@ export default class RecognitionCanvas extends Component{
 		//TODO: Delete logic
 	}
 
-	shapeDetected(shape){
+	shapeDetected(shape, score){
 		console.log(shape);
-		this.recognitionListener(shape);
+		this.recognitionListener(shape, score);
 	}
 
 	undo(){
@@ -141,10 +144,16 @@ export default class RecognitionCanvas extends Component{
 
 		this.context.beginPath();
 		
-		if(currentDot){
+		if(currentDot > 1){
 			this.context.moveTo(this.strokes[currentStroke][currentDot-1].X, this.strokes[currentStroke][currentDot-1].Y);
-		}else{
-			this.context.moveTo(this.strokes[currentStroke][currentDot].X - 1, this.strokes[currentStroke][currentDot].Y)
+		}
+		else if(currentDot == 0){
+			this.context.moveTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y)
+		}
+		else{
+			this.context.closePath();
+			this.context.stroke();
+			return;
 		}
 		this.context.lineTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y);
 		
@@ -174,6 +183,8 @@ export default class RecognitionCanvas extends Component{
 
 	sketchpad_mouseUp(e){
     	this.paint = false;
+    	console.log(this.recognitionTime);
+    	clearTimeout(this.timeoutHandler);
     	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
 	}
 
@@ -198,6 +209,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	sketchpad_touchEnd(e){
+		clearTimeout(this.timeoutHandler);
 		this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
 	}
 

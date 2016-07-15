@@ -71,6 +71,7 @@ export default class Graphic extends Component{
   componentDidMount(){
     this.recognitionCanvas = this.refs.recognitionCanvas;
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
+    this.recognitionCanvas.setRecognitionTime(700);
     this.recognitionCanvas.setRecognitionListener(this.doLogic);
 
     this.canvas = this.refs.context;
@@ -88,8 +89,9 @@ export default class Graphic extends Component{
     // this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
-  doLogic(shape){
+  doLogic(shape, score){
     console.log("recognized " + shape);
+    console.log("score " + score);
   }
 
   addGesture(e){
