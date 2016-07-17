@@ -76,22 +76,14 @@ export default class Graphic extends Component{
 
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
-    
-    // this.ctx = this.canvas.getContext('2d');
-    // window.ctx = this.ctx;
-    
-    // this.canvas.addEventListener('mousedown', this.sketchpad_mouseDown, false);
-    // this.canvas.addEventListener('mousemove', this.sketchpad_mouseMove, false);
-    // window.addEventListener('mouseup', this.sketchpad_mouseUp, false);
-
-    // this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
-    // this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
-    // this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
   }
 
-  doLogic(shape, score){
-    console.log("recognized " + shape);
-    console.log("score " + score);
+  doLogic(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
+    console.log("recognized: "       + shape);
+    console.log("score: "            + score);
+    console.log("centreOfGestureX: " + centreOfGestureX);
+    console.log("centreOfGestureY: " + centreOfGestureY);
+    console.log("point count:"       + pointArray.length);
   }
 
   addGesture(e){

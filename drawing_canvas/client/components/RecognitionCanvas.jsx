@@ -50,6 +50,8 @@ export default class RecognitionCanvas extends Component{
 		this.setRecognitionTime = this.setRecognitionTime.bind(this);
 		this.setRecognitionListener = this.setRecognitionListener.bind(this);
 
+		this.getXCentre = this.getXCentre.bind(this);
+		this.getYCentre = this.getYCentre.bind(this);
 	}
 
 	componentWillMount(){
@@ -69,9 +71,10 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
+		var currentStroke = this.pointArray.length - 1;
 		if(this.recognitionAlgorithm == '$p')
-			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score);
-		else if(recognition == "$n")
+			this.shapeDetected(this.$P.Recognize(this.pointArray[currentStroke]).Name, this.$P.Recognize(this.pointArray[currentStroke]).Score, this.getXCentre(), this.getYCentre());
+		else if(this.recognitionAlgorithm == "$n")
 			this.shapeDetected(this.$N.Recognize());
 	}
 	
@@ -88,7 +91,8 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	addGesture(name){
-		$P.AddGesture(name, this.pointArray);
+		var currentStroke = this.pointArray.length - 1;
+		$P.AddGesture(name, this.pointArray[currentStroke]);
 		this.clearCanvas();
 	}
 
@@ -96,9 +100,20 @@ export default class RecognitionCanvas extends Component{
 		//TODO: Delete logic
 	}
 
-	shapeDetected(shape, score){
+	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
 		console.log(shape);
-		this.recognitionListener(shape, score);
+		var currentStroke = this.pointArray.length - 1;
+		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.pointArray[currentStroke]);
+	}
+
+	getXCentre(){
+		var xCentre = 0;
+		return xCentre;
+	}
+
+	getYCentre(){
+		var yCentre = 0;
+		return yCentre;
 	}
 
 	undo(){
@@ -130,7 +145,7 @@ export default class RecognitionCanvas extends Component{
 		if(!isNaN(x) && !isNaN(y)){
 			var point = new Point(x, y, currentStroke);
 			this.strokes[currentStroke].push(point);
-			this.pointArray.push(point);
+			this.pointArray[currentStroke].push(point);
 		}
   	}
 
@@ -169,6 +184,7 @@ export default class RecognitionCanvas extends Component{
 		this.paint = true;
 
 		this.strokes.push(new Array());
+		this.pointArray.push(new Array());
 
 		this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
 		this.redraw();
