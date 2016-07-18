@@ -35,7 +35,6 @@ export default class Graphic extends Component{
     this.deleteGesture = this.deleteGesture.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.getSquareNumber = this.getSquareNumber.bind(this);
-    this.beautifyBoard = this.beautifyBoard.bind(this);
     this.drawBoardAndBeautifiedGestures = this.drawBoardAndBeautifiedGestures.bind(this);
 
     this.checkWinLogic = this.checkWinLogic.bind(this);
@@ -71,7 +70,7 @@ export default class Graphic extends Component{
   componentDidMount(){
     this.recognitionCanvas = this.refs.recognitionCanvas;
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
-    this.recognitionCanvas.setRecognitionTime(700);
+    this.recognitionCanvas.setRecognitionTime(1000);
     this.recognitionCanvas.setRecognitionListener(this.doLogic);
 
     this.canvas = this.refs.context;
@@ -84,6 +83,7 @@ export default class Graphic extends Component{
     console.log("centreOfGestureX: " + centreOfGestureX);
     console.log("centreOfGestureY: " + centreOfGestureY);
     console.log("point count:"       + pointArray.length);
+
   }
 
   addGesture(e){
@@ -320,52 +320,6 @@ export default class Graphic extends Component{
         }
     }
   }
-
-  beautifyBoard(){
-
-    var xArray = this.boardLinesX[0].concat(this.boardLinesX[1], this.boardLinesX[2], this.boardLinesX[3]);
-    var yArray = this.boardLinesY[0].concat(this.boardLinesY[1], this.boardLinesY[2], this.boardLinesY[3]);
-
-
-    var xMax = Math.max.apply(Math, xArray);
-    var xMin = Math.min.apply(Math, xArray);
-    var yMax = Math.max.apply(Math, yArray);
-    var yMin = Math.min.apply(Math, yArray);
-
-    this.minXOfDrawnBoard = xMin;
-    this.minYOfDrawnBoard = yMin;
-    this.heightOfDrawnBoard = yMax - yMin;
-    this.widthOfDrawnBoard = xMax - xMin;
-
-    context = this.ctx;
-    
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    context.beginPath();
-
-
-    let bw = xMax - xMin;
-    let bh = yMax - yMin;
-
-    let size = 3;
-
-    let wi = bw / size;
-    let hi = bh / size;
-
-    context.moveTo(wi     + xMin, 0   + yMin);
-    context.lineTo(wi     + xMin, bh  + yMin);
-    context.moveTo(wi * 2 + xMin, 0   + yMin);
-    context.lineTo(wi * 2 + xMin, bh  + yMin);
-
-    context.moveTo(0  + xMin, hi      + yMin);
-    context.lineTo(bw + xMin, hi      + yMin);
-    context.moveTo(0  + xMin, hi * 2  + yMin);
-    context.lineTo(bw + xMin, hi * 2  + yMin);
-
-    context.closePath();
-    context.strokeStyle = "black";
-    context.stroke();
-  }
-
 
   onColorChange(e){
   		this.color = e.currentTarget.value;

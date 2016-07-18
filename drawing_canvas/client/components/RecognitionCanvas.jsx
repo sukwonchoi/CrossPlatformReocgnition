@@ -21,10 +21,17 @@ export default class RecognitionCanvas extends Component{
 		//$N stroke array
 		this.strokes = new Array();
 
+		//For actual drawing
+		this.drawingPoints = new Array();
+		this.strokeCount = 0;
+
 		//Recognition settings
 		this.recognitionAlgorithm = "";
 		this.recognitionTime = 600;
 		this.recognitionListener = null;
+
+		//Beautification settings
+		this.doBeautification = false;
 
 		//Timeout for stroke bundling into a single gesture
 		this.timeoutHandler = null;
@@ -38,6 +45,7 @@ export default class RecognitionCanvas extends Component{
 
 		this.addClick = this.addClick.bind(this);
 		this.redraw = this.redraw.bind(this);
+		this.redrawAll = this.redrawAll.bind(this);
 
 		this.undo = this.undo.bind(this);
 		this.redo = this.redo.bind(this);
@@ -90,10 +98,22 @@ export default class RecognitionCanvas extends Component{
 		this.recognitionListener = listener;
 	}
 
+	enableBeautification(){
+		this.doBeautification = true;
+	}
+
+	disableBeautification(){
+		this.disableBeautification = false;
+	}
+
 	addGesture(name){
 		var currentStroke = this.pointArray.length - 1;
 		$P.AddGesture(name, this.pointArray[currentStroke]);
 		this.clearCanvas();
+	}
+
+	addBeautification(name, algorithm){
+
 	}
 
 	deleteGesture(name){
@@ -103,16 +123,41 @@ export default class RecognitionCanvas extends Component{
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
 		console.log(shape);
 		var currentStroke = this.pointArray.length - 1;
+
+		while(this.strokeCount > 0)
+		{
+			this.drawingPoints.push(this.strokes[currentStroke]);
+			this.strokeCount--;
+			console.log(this.strokeCount);
+		}
+		this.beautifyLast(shape);
+		this.redrawAll();
 		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.pointArray[currentStroke]);
 	}
 
 	getXCentre(){
+		var currentStroke = this.pointArray.length - 1;
 		var xCentre = 0;
+		
+		for(var x = 0; x < this.pointArray[currentStroke].length - 1; x++){
+			xCentre += this.pointArray[currentStroke][x].X;
+		}
+
+		xCentre /= this.pointArray[currentStroke].length;
+
 		return xCentre;
 	}
 
 	getYCentre(){
+		var currentStroke = this.pointArray.length - 1;
 		var yCentre = 0;
+
+		for(var y = 0; y < this.pointArray[currentStroke].length - 1; y++){
+			yCentre += this.pointArray[currentStroke][y].Y;
+		}
+
+		yCentre /= this.pointArray[currentStroke].length;
+
 		return yCentre;
 	}
 
@@ -177,6 +222,156 @@ export default class RecognitionCanvas extends Component{
 		this.context.stroke();
 	}
 
+	redrawAll(){
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.context.strokeStyle = this.color;
+		this.context.lineJoin = "round";
+		this.context.lineWidth = 5;
+
+		for(var i = 0; i < this.drawingPoints.length; i++){
+			for(var j = 0; j < this.drawingPoints[i].length; j++){
+				
+				this.context.beginPath();
+				console.log("Number of points in stroke" + i + ": " +this.drawingPoints[i].length);
+
+				if(j > 0){
+					this.context.moveTo(this.drawingPoints[i][j-1].X, this.drawingPoints[i][j-1].Y);
+				}
+				else if(j == 0){
+					this.context.moveTo(this.drawingPoints[i][j].X, this.drawingPoints[i][j].Y)
+				}
+				else{
+					this.context.closePath();
+					this.context.stroke();
+					continue;
+				}
+
+				this.context.lineTo(this.drawingPoints[i][j].X, this.drawingPoints[i][j].Y);
+
+				this.context.closePath();
+				this.context.stroke();
+			}
+		}
+	}
+
+	beautifyLast(shape){
+
+		var points = this.drawingPoints.pop();
+
+		if(shape == "X"){
+			var points2 = this.drawingPoints.pop();
+			
+			var xArray = new Array();
+			var yArray = new Array();
+
+			for(var i = 0; i < points.length; i++){
+				xArray.push(points[i].X);
+				yArray.push(points[i].Y);
+			}
+			for(var i = 0; i < points2.length; i++){
+				xArray.push(points[i].X);
+				yArray.push(points[i].Y);
+			}
+
+			var xMax = Math.max.apply(Math, xArray);
+		    var xMin = Math.min.apply(Math, xArray);
+		    var xDiff = xMax - xMin;
+		    var xCentre = (xMax + xMin) / 2;
+
+		    var yMax = Math.max.apply(Math, yArray);
+		    var yMin = Math.min.apply(Math, yArray);
+		    var yDiff = yMax - yMin;
+		    var yCentre = (yMax + yMin) / 2;
+
+		    var radius = xDiff < yDiff ? Math.round(xDiff/2 * 0.85) : Math.round(yDiff/2 * 0.85);
+
+		    var xSmall = xCentre - radius;
+		    var xLarge = xCentre + radius;
+		    var ySmall = yCentre - radius;
+		    var yLarge = yCentre + radius;
+
+		    var leftTop 	= new Point(xSmall, yLarge, 1);
+		    var rightTop 	= new Point(xLarge, yLarge, 1);
+		    var leftBottom 	= new Point(xSmall, ySmall, 1);
+		    var rightBottom = new Point(xLarge, ySmall, 1);
+
+		    var newLineDiag = new Array();
+		    newLineDiag.push(leftTop);
+		    newLineDiag.push(rightBottom);
+		    var newLineAntiDiag = new Array();
+		    newLineAntiDiag.push(rightTop);
+		    newLineAntiDiag.push(leftBottom);
+
+		    this.drawingPoints.push(newLineAntiDiag);
+		    this.drawingPoints.push(newLineDiag);
+		}
+		else if(shape == "O"){
+			var xArray = new Array();
+			var yArray = new Array();
+
+			for(var i = 0; i < points.length; i++){
+				xArray.push(points[i].X);
+				yArray.push(points[i].Y);
+			}
+
+			var xMax = Math.max.apply(Math, xArray);
+		    var xMin = Math.min.apply(Math, xArray);
+		    var xDiff = xMax - xMin;
+		    var xCentre = (xMax + xMin) / 2;
+
+		    var yMax = Math.max.apply(Math, yArray);
+		    var yMin = Math.min.apply(Math, yArray);
+		    var yDiff = yMax - yMin;
+		    var yCentre = (yMax + yMin) / 2;
+
+		    var radius = xDiff < yDiff ? Math.round(xDiff/2 * 0.85) : Math.round(yDiff/2 * 0.85);
+
+		    var newLine = new Array();
+		    var steps = 32;
+		    for(var granularity = 0; granularity < steps; granularity++) {
+					var xPoint = Math.round(xCentre + (radius * Math.cos(2 * Math.PI * granularity / steps)));
+					var yPoint = Math.round(yCentre + (radius * Math.sin(2 * Math.PI * granularity / steps)));	
+					var newPoint = new Point(xPoint, yPoint, 1);
+
+					console.log(xPoint);
+					console.log(yPoint);
+
+					newLine.push(newPoint);			
+			}
+			newLine.push(newLine[0]);
+			this.drawingPoints.push(newLine);
+		}
+		else if(shape == "Vertical Line"){
+			var firstPoint = points[0];
+			var lastPoint = points[points.length - 1];
+
+			var averageX = (firstPoint.X + lastPoint.X) / 2;
+			var newPoint1 = new Point(averageX, firstPoint.Y, 1);
+			var newPoint2 = new Point(averageX, lastPoint.Y, 1);
+
+			var newLine = new Array();
+			newLine.push(newPoint1);
+			newLine.push(newPoint2);
+			this.drawingPoints.push(newLine);
+		}
+		else if(shape == "Horizontal Line"){
+			var firstPoint = points[0];
+			var lastPoint = points[points.length - 1];
+
+			var averageY = (firstPoint.Y + lastPoint.Y) / 2;
+			var newPoint1 = new Point(firstPoint.X, averageY, 1);
+			var newPoint2 = new Point(lastPoint.X, averageY, 1);
+
+			var newLine = new Array();
+			newLine.push(newPoint1);
+			newLine.push(newPoint2);
+			this.drawingPoints.push(newLine);
+		}
+		else{
+			console.log("shape not found");
+		}
+	}
+
 	sketchpad_mouseDown(e){
 		this.mouseX = e.pageX - this.canvas.offsetLeft;
 		this.mouseY = e.pageY - this.canvas.offsetTop;
@@ -202,6 +397,7 @@ export default class RecognitionCanvas extends Component{
     	console.log(this.recognitionTime);
     	clearTimeout(this.timeoutHandler);
     	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
+    	this.strokeCount++;
 	}
 
 	sketchpad_touchStart(e){
@@ -227,6 +423,7 @@ export default class RecognitionCanvas extends Component{
 	sketchpad_touchEnd(e){
 		clearTimeout(this.timeoutHandler);
 		this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
+		this.strokeCount++;
 	}
 
 	getTouchPos(e){

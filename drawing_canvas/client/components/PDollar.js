@@ -109,6 +109,13 @@ export function PDollarRecognizer() // constructor
 		new Point(345,9,1),new Point(345,87,1),
 		new Point(351,8,2),new Point(363,8,2),new Point(372,9,2),new Point(380,11,2),new Point(386,14,2),new Point(391,17,2),new Point(394,22,2),new Point(397,28,2),new Point(399,34,2),new Point(400,42,2),new Point(400,50,2),new Point(400,56,2),new Point(399,61,2),new Point(397,66,2),new Point(394,70,2),new Point(391,74,2),new Point(386,78,2),new Point(382,81,2),new Point(377,83,2),new Point(372,85,2),new Point(367,87,2),new Point(360,87,2),new Point(355,88,2),new Point(349,87,2)
 	));
+	this.PointClouds[2] = new PointCloud("Horizontal Line", new Array(
+		new Point(12,347,1),new Point(119,347,1)
+	));
+	this.PointClouds[3] = new PointCloud("Vertical Line", new Array(
+		new Point(347,12,1),new Point(347,119,1)
+	));
+
 
 	 //this.PointClouds[0] = new PointCloud("T", new Array(
 	 //	new Point(30,7,1),new Point(103,7,1),
