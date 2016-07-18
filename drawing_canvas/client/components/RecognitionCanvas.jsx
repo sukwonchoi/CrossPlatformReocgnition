@@ -404,7 +404,10 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 		this.paint = true;
 
-		this.addClick(this.touchX, this.touchY, true);
+		this.strokes.push(new Array());
+		this.pointArray.push(new Array());
+
+		this.addClick(this.touchX, this.touchY);
 		this.redraw();
 
 		e.preventDefault();
@@ -414,16 +417,18 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 
 		if(this.paint){
-			this.addClick(this.touchX, this.touchY, true);
+			this.addClick(this.touchX, this.touchY);
 			this.redraw();
 		}
 		e.preventDefault();
 	}
 
 	sketchpad_touchEnd(e){
-		clearTimeout(this.timeoutHandler);
-		this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
-		this.strokeCount++;
+    	this.paint = false;
+    	console.log(this.recognitionTime);
+    	clearTimeout(this.timeoutHandler);
+    	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
+    	this.strokeCount++;
 	}
 
 	getTouchPos(e){
