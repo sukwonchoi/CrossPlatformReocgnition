@@ -79,9 +79,8 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
-		var currentStroke = this.pointArray.length - 1;
 		if(this.recognitionAlgorithm == '$p')
-			this.shapeDetected(this.$P.Recognize(this.pointArray[currentStroke]).Name, this.$P.Recognize(this.pointArray[currentStroke]).Score, this.getXCentre(), this.getYCentre());
+			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
 		else if(this.recognitionAlgorithm == "$n")
 			this.shapeDetected(this.$N.Recognize());
 	}
@@ -107,8 +106,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	addGesture(name){
-		var currentStroke = this.pointArray.length - 1;
-		$P.AddGesture(name, this.pointArray[currentStroke]);
+		$P.AddGesture(name, this.pointArray);
 		this.clearCanvas();
 	}
 
@@ -121,42 +119,41 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
-		console.log(shape);
-		var currentStroke = this.pointArray.length - 1;
+		var newDrawingPoints = new Array();
 
 		while(this.strokeCount > 0)
 		{
-			this.drawingPoints.push(this.strokes[currentStroke]);
+			newDrawingPoints.push(this.strokes[this.strokes.length - this.strokeCount]);
 			this.strokeCount--;
 			console.log(this.strokeCount);
 		}
+		this.drawingPoints.push(newDrawingPoints);
 		this.beautifyLast(shape);
 		this.redrawAll();
-		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.pointArray[currentStroke]);
+		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.drawingPoints[this.drawingPoints.length - 1]);
+		this.pointArray.length = 0;
 	}
 
 	getXCentre(){
-		var currentStroke = this.pointArray.length - 1;
 		var xCentre = 0;
 		
-		for(var x = 0; x < this.pointArray[currentStroke].length - 1; x++){
-			xCentre += this.pointArray[currentStroke][x].X;
+		for(var x = 0; x < this.pointArray.length - 1; x++){
+			xCentre += this.pointArray[x].X;
 		}
 
-		xCentre /= this.pointArray[currentStroke].length;
+		xCentre /= this.pointArray.length;
 
 		return xCentre;
 	}
 
 	getYCentre(){
-		var currentStroke = this.pointArray.length - 1;
 		var yCentre = 0;
 
-		for(var y = 0; y < this.pointArray[currentStroke].length - 1; y++){
-			yCentre += this.pointArray[currentStroke][y].Y;
+		for(var y = 0; y < this.pointArray.length - 1; y++){
+			yCentre += this.pointArray[y].Y;
 		}
 
-		yCentre /= this.pointArray[currentStroke].length;
+		yCentre /= this.pointArray.length;
 
 		return yCentre;
 	}
@@ -190,7 +187,7 @@ export default class RecognitionCanvas extends Component{
 		if(!isNaN(x) && !isNaN(y)){
 			var point = new Point(x, y, currentStroke);
 			this.strokes[currentStroke].push(point);
-			this.pointArray[currentStroke].push(point);
+			this.pointArray.push(point);
 		}
   	}
 
@@ -230,37 +227,41 @@ export default class RecognitionCanvas extends Component{
 
 		for(var i = 0; i < this.drawingPoints.length; i++){
 			for(var j = 0; j < this.drawingPoints[i].length; j++){
+				for(var k = 0; k < this.drawingPoints[i][j].length; k++){
 				
-				this.context.beginPath();
-				console.log("Number of points in stroke" + i + ": " +this.drawingPoints[i].length);
+					this.context.beginPath();
+					console.log("Number of points in stroke" + j + ": " +this.drawingPoints[i][j].length);
 
-				if(j > 0){
-					this.context.moveTo(this.drawingPoints[i][j-1].X, this.drawingPoints[i][j-1].Y);
-				}
-				else if(j == 0){
-					this.context.moveTo(this.drawingPoints[i][j].X, this.drawingPoints[i][j].Y)
-				}
-				else{
+					if(k > 0){
+						this.context.moveTo(this.drawingPoints[i][j][k-1].X, this.drawingPoints[i][j][k-1].Y);
+					}
+					else if(k == 0){
+						this.context.moveTo(this.drawingPoints[i][j][k].X, this.drawingPoints[i][j][k].Y)
+					}
+					else{
+						this.context.closePath();
+						this.context.stroke();
+						continue;
+					}
+
+					this.context.lineTo(this.drawingPoints[i][j][k].X, this.drawingPoints[i][j][k].Y);
+
 					this.context.closePath();
 					this.context.stroke();
-					continue;
 				}
-
-				this.context.lineTo(this.drawingPoints[i][j].X, this.drawingPoints[i][j].Y);
-
-				this.context.closePath();
-				this.context.stroke();
 			}
 		}
 	}
 
+
 	beautifyLast(shape){
 
-		var points = this.drawingPoints.pop();
+		var strokes = this.drawingPoints.pop();
 
 		if(shape == "X"){
-			var points2 = this.drawingPoints.pop();
-			
+			var points = this.strokes.pop();
+			var points2 = this.strokes.pop();
+
 			var xArray = new Array();
 			var yArray = new Array();
 
@@ -269,8 +270,8 @@ export default class RecognitionCanvas extends Component{
 				yArray.push(points[i].Y);
 			}
 			for(var i = 0; i < points2.length; i++){
-				xArray.push(points[i].X);
-				yArray.push(points[i].Y);
+				xArray.push(points2[i].X);
+				yArray.push(points2[i].Y);
 			}
 
 			var xMax = Math.max.apply(Math, xArray);
@@ -301,11 +302,14 @@ export default class RecognitionCanvas extends Component{
 		    var newLineAntiDiag = new Array();
 		    newLineAntiDiag.push(rightTop);
 		    newLineAntiDiag.push(leftBottom);
+		    var newGesture = new Array();
+		    newGesture.push(newLineDiag);
+		    newGesture.push(newLineAntiDiag);
 
-		    this.drawingPoints.push(newLineAntiDiag);
-		    this.drawingPoints.push(newLineDiag);
+		    this.drawingPoints.push(newGesture);
 		}
 		else if(shape == "O"){
+			var points = this.strokes.pop();
 			var xArray = new Array();
 			var yArray = new Array();
 
@@ -339,9 +343,12 @@ export default class RecognitionCanvas extends Component{
 					newLine.push(newPoint);			
 			}
 			newLine.push(newLine[0]);
-			this.drawingPoints.push(newLine);
+			var newGesture = new Array();
+			newGesture.push(newLine);
+			this.drawingPoints.push(newGesture);
 		}
 		else if(shape == "Vertical Line"){
+			var points = this.strokes.pop();
 			var firstPoint = points[0];
 			var lastPoint = points[points.length - 1];
 
@@ -352,9 +359,12 @@ export default class RecognitionCanvas extends Component{
 			var newLine = new Array();
 			newLine.push(newPoint1);
 			newLine.push(newPoint2);
-			this.drawingPoints.push(newLine);
+			var newGesture = new Array();
+			newGesture.push(newLine);
+			this.drawingPoints.push(newGesture);
 		}
 		else if(shape == "Horizontal Line"){
+			var points = this.strokes.pop();
 			var firstPoint = points[0];
 			var lastPoint = points[points.length - 1];
 
@@ -365,7 +375,9 @@ export default class RecognitionCanvas extends Component{
 			var newLine = new Array();
 			newLine.push(newPoint1);
 			newLine.push(newPoint2);
-			this.drawingPoints.push(newLine);
+			var newGesture = new Array();
+			newGesture.push(newLine);
+			this.drawingPoints.push(newGesture);
 		}
 		else{
 			console.log("shape not found");
@@ -379,7 +391,6 @@ export default class RecognitionCanvas extends Component{
 		this.paint = true;
 
 		this.strokes.push(new Array());
-		this.pointArray.push(new Array());
 
 		this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
 		this.redraw();
@@ -404,10 +415,7 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 		this.paint = true;
 
-		this.strokes.push(new Array());
-		this.pointArray.push(new Array());
-
-		this.addClick(this.touchX, this.touchY);
+		this.addClick(this.touchX, this.touchY, true);
 		this.redraw();
 
 		e.preventDefault();
@@ -417,18 +425,16 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 
 		if(this.paint){
-			this.addClick(this.touchX, this.touchY);
+			this.addClick(this.touchX, this.touchY, true);
 			this.redraw();
 		}
 		e.preventDefault();
 	}
 
 	sketchpad_touchEnd(e){
-    	this.paint = false;
-    	console.log(this.recognitionTime);
-    	clearTimeout(this.timeoutHandler);
-    	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
-    	this.strokeCount++;
+		clearTimeout(this.timeoutHandler);
+		this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
+		this.strokeCount++;
 	}
 
 	getTouchPos(e){
