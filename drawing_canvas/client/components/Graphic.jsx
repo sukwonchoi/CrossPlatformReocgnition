@@ -65,24 +65,56 @@ export default class Graphic extends Component{
 
   recognitionCallback(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
     console.log("recognized: "       + shape);
-    console.log("score: "            + score);
-    console.log("centreOfGestureX: " + centreOfGestureX);
-    console.log("centreOfGestureY: " + centreOfGestureY);
-    console.log("point count:"       + pointArray.length);
+    //console.log("score: "            + score);
+    //console.log("centreOfGestureX: " + centreOfGestureX);
+    //console.log("centreOfGestureY: " + centreOfGestureY);
+    console.log("point count:"       + pointArray[0].length);
 
-    if(shape == "X"){
+    if(this.boardDrawn){
+       var squareNumber = 0;
+      if(shape == "Horizontal Line" || shape == "Vertical Lines"){
+        // undo
+        // warn
+      }
+      else if(shape == "X"){
+        squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
+      }
+      else if(shape == "O"){
+        squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY); 
+      }
 
+      console.log("Square number: " + squareNumber);
     }
-    else if(shape == "O"){
-
+    else{
+      if(shape == "X" || shape == "O"){
+        //undo
+        //warn
+      }
+      else if(shape == "Horizontal Line"){
+        if(this.horizontalLines.length == 2){
+          //undo
+          //warn
+        }
+        else{
+          this.horizontalLines.push(pointArray[0]);
+        }
+      }
+      else if(shape == "Vertical Line"){
+        if(this.verticalLines.length == 2){
+          //undo
+          //warn
+        }
+        else{
+          this.verticalLines.push(pointArray[0]);
+        }
+      }
     }
-    else if(shape == "Horizontal Line"){
 
-    }
-    else if(shape == "Vertical Line"){
-
+    if(this.verticalLines.length == 2 && this.horizontalLines.length == 2){
+      this.boardDrawn = true;
     }
 
+    console.log("Board Drawn: " + this.boardDrawn);
   }
 
   addGesture(e){
@@ -153,64 +185,53 @@ export default class Graphic extends Component{
     return false;
   }
 
-  getSquareNumber(context){
+  getSquareNumber(x, y){
 
-    let count = this.pointArray.length;
+    console.log("X: " + x);
+    console.log("Y: " + y);
 
-    var x = 0;
-    var y = 0;
+    var xLeft = this.verticalLines[0].X < this.verticalLines[1].X ? this.verticalLines[0].X : this.verticalLines[1].X;
+    var xRight = this.verticalLines[0].X > this.verticalLines[1].X ? this.verticalLines[0].X : this.verticalLines[1].X;
+    var yTop = this.horizontalLines[0].Y > this.horizontalLines[1].Y ? this.horizontalLines[0].Y : this.horizontalLines[1].Y;
+    var yBottom = this.horizontalLines[0].Y < this.horizontalLines[1].Y ? this.horizontalLines[0].Y : this.horizontalLines[1].Y;
 
-    for(var i = 0; i < count; i++){
-      x += pointArray[i].X;
-      y += pointArray[i].Y;  
+    console.log(xLeft);
+    console.log(xRight);
+    console.log(yTop);
+    console.log(yBottom);
+
+    if(x < xLeft){
+      if(y > yTop){
+        return 1;
+      }
+      else if(y > yBottom){
+        return 4;
+      }
+      else{
+        return 7;
+      }
     }
-
-    x /= count;
-    y /= count;
-
-    console.log("X:" + x);
-    console.log("Y:" + y);
-
-    let width = this.widthOfDrawnBoard;
-    let height = this.heightOfDrawnBoard;
-    let xMin = this.minXOfDrawnBoard;
-    let yMin = this.minYOfDrawnBoard;
-    
-    x = x - xMin;
-    y = y - yMin;
-
-    if( x < width/3 ){
-        if(y < height/3){
-          return 1;
-        }
-        else if( y < 2 * height/3){
-          return 4;
-        }
-        else{
-          return 7;
-        }
-    }
-    else if ( x < 2 * width/3 ){
-        if(y < height/3){
-          return 2;
-        }
-        else if( y < 2 * height/3){
-          return 5;
-        }
-        else{
-          return 8;
-        }
+    else if(x < xRight){
+      if(y > yTop){
+        return 2;
+      }
+      else if(y > yBottom){
+        return 5;
+      }
+      else{
+        return 8;
+      }
     }
     else{
-        if(y < height/3){
-          return 3;
-        }
-        else if( y < 2 * height/3){
-          return 6;
-        }
-        else{ 
-          return 9;
-        }
+      if(y > yTop){
+        return 3;
+      }
+      else if(y > yBottom){
+        return 6;
+      }
+      else{
+        return 9;
+      }
     }
   }
 

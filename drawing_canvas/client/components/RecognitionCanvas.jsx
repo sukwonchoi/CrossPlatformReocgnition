@@ -125,7 +125,6 @@ export default class RecognitionCanvas extends Component{
 		{
 			newDrawingPoints.push(this.strokes[this.strokes.length - this.strokeCount]);
 			this.strokeCount--;
-			console.log(this.strokeCount);
 		}
 		this.drawingPoints.push(newDrawingPoints);
 		this.beautifyLast(shape);
@@ -230,8 +229,6 @@ export default class RecognitionCanvas extends Component{
 				for(var k = 0; k < this.drawingPoints[i][j].length; k++){
 				
 					this.context.beginPath();
-					console.log("Number of points in stroke" + j + ": " +this.drawingPoints[i][j].length);
-
 					if(k > 0){
 						this.context.moveTo(this.drawingPoints[i][j][k-1].X, this.drawingPoints[i][j][k-1].Y);
 					}
@@ -336,10 +333,6 @@ export default class RecognitionCanvas extends Component{
 					var xPoint = Math.round(xCentre + (radius * Math.cos(2 * Math.PI * granularity / steps)));
 					var yPoint = Math.round(yCentre + (radius * Math.sin(2 * Math.PI * granularity / steps)));	
 					var newPoint = new Point(xPoint, yPoint, 1);
-
-					console.log(xPoint);
-					console.log(yPoint);
-
 					newLine.push(newPoint);			
 			}
 			newLine.push(newLine[0]);
@@ -405,7 +398,6 @@ export default class RecognitionCanvas extends Component{
 
 	sketchpad_mouseUp(e){
     	this.paint = false;
-    	console.log(this.recognitionTime);
     	clearTimeout(this.timeoutHandler);
     	this.timeoutHandler = setTimeout(this.recognize, this.recognitionTime);
     	this.strokeCount++;
