@@ -142,7 +142,7 @@ export default class RecognitionCanvas extends Component{
 
 		xCentre /= this.pointArray.length;
 
-		return xCentre;
+		return Math.round(xCentre);
 	}
 
 	getYCentre(){
@@ -154,7 +154,7 @@ export default class RecognitionCanvas extends Component{
 
 		yCentre /= this.pointArray.length;
 
-		return yCentre;
+		return Math.round(yCentre);
 	}
 
 	undo(){
@@ -227,7 +227,6 @@ export default class RecognitionCanvas extends Component{
 		for(var i = 0; i < this.drawingPoints.length; i++){
 			for(var j = 0; j < this.drawingPoints[i].length; j++){
 				for(var k = 0; k < this.drawingPoints[i][j].length; k++){
-				
 					this.context.beginPath();
 					if(k > 0){
 						this.context.moveTo(this.drawingPoints[i][j][k-1].X, this.drawingPoints[i][j][k-1].Y);
@@ -240,9 +239,7 @@ export default class RecognitionCanvas extends Component{
 						this.context.stroke();
 						continue;
 					}
-
 					this.context.lineTo(this.drawingPoints[i][j][k].X, this.drawingPoints[i][j][k].Y);
-
 					this.context.closePath();
 					this.context.stroke();
 				}

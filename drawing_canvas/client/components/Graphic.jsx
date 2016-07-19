@@ -68,22 +68,32 @@ export default class Graphic extends Component{
     //console.log("score: "            + score);
     //console.log("centreOfGestureX: " + centreOfGestureX);
     //console.log("centreOfGestureY: " + centreOfGestureY);
-    console.log("point count:"       + pointArray[0].length);
+    console.log("stroke count:" + pointArray.length);
+    console.log("point count:"  + pointArray[0].length);
 
     if(this.boardDrawn){
-       var squareNumber = 0;
       if(shape == "Horizontal Line" || shape == "Vertical Lines"){
         // undo
         // warn
+        return;
       }
-      else if(shape == "X"){
-        squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
+      var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
+      var row = Math.floor((squareNumber-1) / 3);
+      var column = (squareNumber-1) % 3;
+
+      console.log("Square Number: " + squareNumber);
+      console.log("Row: " + row);
+      console.log("Column: " + column);
+
+      if(shape == "X"){
+        this.board[row][column] = "X";
       }
       else if(shape == "O"){
-        squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY); 
+        this.board[row][column] = "O";
       }
 
       console.log("Square number: " + squareNumber);
+      console.log("Did someone win?: " + this.checkWinLogic(row, column, shape));
     }
     else{
       if(shape == "X" || shape == "O"){
@@ -130,7 +140,7 @@ export default class Graphic extends Component{
   }
 
   checkWinLogic(x, y, s){
-  
+    var n = 3;
     for(i = 0; i < n; i++){
       if(this.board[x][i] != s){
         break;
@@ -190,21 +200,16 @@ export default class Graphic extends Component{
     console.log("X: " + x);
     console.log("Y: " + y);
 
-    var xLeft = this.verticalLines[0].X < this.verticalLines[1].X ? this.verticalLines[0].X : this.verticalLines[1].X;
-    var xRight = this.verticalLines[0].X > this.verticalLines[1].X ? this.verticalLines[0].X : this.verticalLines[1].X;
-    var yTop = this.horizontalLines[0].Y > this.horizontalLines[1].Y ? this.horizontalLines[0].Y : this.horizontalLines[1].Y;
-    var yBottom = this.horizontalLines[0].Y < this.horizontalLines[1].Y ? this.horizontalLines[0].Y : this.horizontalLines[1].Y;
-
-    console.log(xLeft);
-    console.log(xRight);
-    console.log(yTop);
-    console.log(yBottom);
+    var xLeft = this.verticalLines[0][0].X < this.verticalLines[1][0].X ? this.verticalLines[0][0].X : this.verticalLines[1][0].X;
+    var xRight = this.verticalLines[0][0].X > this.verticalLines[1][0].X ? this.verticalLines[0][0].X : this.verticalLines[1][0].X;
+    var yTop = this.horizontalLines[0][0].Y > this.horizontalLines[1][0].Y ? this.horizontalLines[0][0].Y : this.horizontalLines[1][0].Y;
+    var yBottom = this.horizontalLines[0][0].Y < this.horizontalLines[1][0].Y ? this.horizontalLines[0][0].Y : this.horizontalLines[1][0].Y;
 
     if(x < xLeft){
-      if(y > yTop){
+      if(y < yBottom){
         return 1;
       }
-      else if(y > yBottom){
+      else if(y < yTop){
         return 4;
       }
       else{
@@ -212,10 +217,10 @@ export default class Graphic extends Component{
       }
     }
     else if(x < xRight){
-      if(y > yTop){
+      if(y < yBottom){
         return 2;
       }
-      else if(y > yBottom){
+      else if(y < yTop){
         return 5;
       }
       else{
@@ -223,10 +228,10 @@ export default class Graphic extends Component{
       }
     }
     else{
-      if(y > yTop){
+      if(y < yBottom){
         return 3;
       }
-      else if(y > yBottom){
+      else if(y < yTop){
         return 6;
       }
       else{
