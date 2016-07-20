@@ -2,6 +2,16 @@ import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
 import RecognitionCanvas from './RecognitionCanvas.jsx'
 
+import {Tabs, Tab} from 'material-ui/Tabs';
+import FontIcon from 'material-ui/FontIcon';
+import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
+import AvReplay from 'material-ui/svg-icons/av/replay';
+import Undo from 'material-ui/svg-icons/content/undo';
+import Redo from 'material-ui/svg-icons/content/redo';
+import ContentAddCircleOutline from 'material-ui/svg-icons/content/add-circle-outline';
+import ImageColorLens from 'material-ui/svg-icons/image/color-lens';
+
+
 import InkStore from '../stores/InkStore.js';
 
 export default class Graphic extends Component{
@@ -243,40 +253,46 @@ export default class Graphic extends Component{
   onColorChange(e){
   		this.color = e.currentTarget.value;
   }
+// <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
 
+//         <input type="submit" onClick={this.dollarP} value="$P" id="clearbutton"  />
+//         <input type="submit" onClick={this.dollarN} value="$N" id="clearbutton"  />
+
+//         <form onSubmit={this.addGesture}>
+//           <input type="text" name="gesturename" id="gesturename"/>
+//           <input type="submit" value="Add Geture" id="addgesturebutton"  />
+//         </form>
+//         <form action="">
+//           <input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
+//           <input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
+//           <input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
+//         </form>      
+//       </div>
+      // <ul>
+      //       {
+      //         this.state.gestureList.map(function(name){
+      //               return <li key ={name}>
+      //                         {name}
+      //                         <input type="submit" name={name} value="Delete" onClick={() => this.deleteGesture(name)} />
+      //                       </li>;
+      //             })
+      //       }
+      //     </ul>
   render(){
     return (
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
-        <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
 
-        <input type="submit" onClick={this.dollarP} value="$P" id="clearbutton"  />
-        <input type="submit" onClick={this.dollarN} value="$N" id="clearbutton"  />
+        <Tabs>
+          <Tab icon={<Undo />} />
+          <Tab icon={<Redo />} />
+          <Tab icon={<ContentAddCircleOutline />} />
+          <Tab className="basics" onActive={this.test} icon={<ImageColorLens />} />
+        </Tabs>
 
-        <form onSubmit={this.addGesture}>
-          <input type="text" name="gesturename" id="gesturename"/>
-          <input type="submit" value="Add Geture" id="addgesturebutton"  />
-        </form>
-        <form action="">
-    			<input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
-    			<input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
-    			<input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
- 		    </form>      
-      </div>
+        </div>
+        
       );
-
-    /*
-      <ul>
-            {
-              this.state.gestureList.map(function(name){
-                    return <li key ={name}>
-                              {name}
-                              <input type="submit" name={name} value="Delete" onClick={() => this.deleteGesture(name)} />
-                            </li>;
-                  })
-            }
-          </ul>
-    */
   }
 }
 
