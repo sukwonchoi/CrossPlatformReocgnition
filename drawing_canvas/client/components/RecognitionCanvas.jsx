@@ -439,7 +439,7 @@ export default class RecognitionCanvas extends Component{
 
 	render(){
 		return(
-			<canvas width={screen.width} height={screen.height - 122} ref="canvas" />
+			<canvas width={screen.width} height={screen.height - 200} ref="canvas" />
 			);
 	}
 

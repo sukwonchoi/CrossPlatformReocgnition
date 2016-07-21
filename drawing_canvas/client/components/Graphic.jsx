@@ -284,51 +284,10 @@ export default class Graphic extends Component{
   }
 
   render(){
-    const popover = {
-      position: 'fixed',
-      "background-color": 'red',
-      bottom: '0',
-      right: '0',
-      zIndex: '2',
-    }
-    const cover = {
-      position: 'relative',
-      top: '0',
-      right: '50px',
-      bottom: '45px',
-      left: '0',
-    }
-    const xd = {
-      position:'fixed',
-      top: screen.height - 20,
-      left:0,
-      width:'100%',
-      height:'60px',
-    }
     return (
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
-
-        { this.state.displayColorPicker ? 
-              <div id="colorPicker" style={ popover }>
-                <div style={ cover } onClick={ this.handleClose }/>
-                <SwatchesPicker />
-            </div> : null }
-
-        <Tabs style={ xd }>
-          <Tab icon={<Undo />} />
-          <Tab icon={<Redo />} />
-          <Tab icon={<ContentAddCircleOutline />} />
-
-          <Tab className="basics" onActive={ this.handleClick } icon={<ImageColorLens />}>
-            asdf
-        </Tab>
-
-
-            
-        </Tabs>
-
-        </div>
+      </div>
         
       );
   }
@@ -350,50 +309,6 @@ class GestureList extends React.Component{
         }
       </ul>    
       );
-  }
-}
-
-class ButtonExample extends React.Component {
-  constructor(){
-    super();
-    this.state = {
-      displayColorPicker: false,
-    };
-    this.handleClick = this.handleClick.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-  }
-
-  handleClick() {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
-  };
-
-  handleClose() {
-    console.log("handle close");
-    this.setState({ displayColorPicker: false });
-  };
-
-  render() {
-    const popover = {
-      position: 'absolute',
-      zIndex: '2',
-    }
-    const cover = {
-      position: 'fixed',
-      top: '100px',
-      right: '0',
-      bottom: '0',
-      left: '0',
-    }
-    return (
-      <div>
-        <button onClick={ this.handleClick }>Pick Color</button>
-        { this.state.displayColorPicker ? 
-          <div style={ popover }>
-            <div style={ cover } onChangeComplete={ this.handleChangeComplete } onClick={ this.handleClose }/>
-            <SwatchesPicker />
-          </div> : null }
-      </div>
-    )
   }
 }
 
