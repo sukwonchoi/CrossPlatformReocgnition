@@ -60,6 +60,11 @@ render(){
     { route: 'home', text: 'Home' },
     { route: 'about', text: 'About' },
   ];
+
+  const appBarStyle = {
+      position:'fixed',
+  }
+
   return (
     <div>
       <Drawer
@@ -69,6 +74,7 @@ render(){
         <MenuItem linkButton containerElement={<Link to="/graph" />} onTouchTap={() => this.titleHandler("Swag")} primaryText="NEW STUFF" />
       </Drawer>
       <AppBar
+        style={appBarStyle}
         title={this.state.title}
         isInitiallyOpen={true} 
         onLeftIconButtonTouchTap={this._toggle} 

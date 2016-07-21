@@ -298,13 +298,23 @@ export default class Graphic extends Component{
       bottom: '45px',
       left: '0',
     }
-    const xd = {
+    const tabsStyle = {
       position:'fixed',
-      top: screen.height - 20,
+      bottom:0,
       left:0,
       width:'100%',
       height:'60px',
     }
+    const tabStyle = {
+      height: '60px',
+    }
+
+    const inkBarStyle = {
+      visibility: 'hidden',
+      height:'0px',
+      width:'0px',
+    }
+
     return (
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
@@ -315,17 +325,13 @@ export default class Graphic extends Component{
                 <SwatchesPicker />
             </div> : null }
 
-        <Tabs style={ xd }>
-          <Tab icon={<Undo />} />
-          <Tab icon={<Redo />} />
-          <Tab icon={<ContentAddCircleOutline />} />
+        <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
+          <Tab icon={<Undo />} style ={ tabStyle }/>
+          <Tab icon={<Redo />} style ={ tabStyle }/>
+          <Tab icon={<ContentAddCircleOutline />} style ={ tabStyle }/>
 
-          <Tab className="basics" onActive={ this.handleClick } icon={<ImageColorLens />}>
-            asdf
-        </Tab>
-
-
-            
+          <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }>
+          </Tab>  
         </Tabs>
 
         </div>
