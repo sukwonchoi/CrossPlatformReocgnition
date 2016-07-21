@@ -158,6 +158,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	undo(){
+		
 
 	}
 	
