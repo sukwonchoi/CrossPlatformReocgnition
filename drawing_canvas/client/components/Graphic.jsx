@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Point, PDollarRecognizer } from './PDollar.js'
 import RecognitionCanvas from './RecognitionCanvas.jsx'
 
+import ColorPicker from './ColorPicker.jsx'
+
 import {Tabs, Tab} from 'material-ui/Tabs';
 import FontIcon from 'material-ui/FontIcon';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
@@ -11,6 +13,8 @@ import Redo from 'material-ui/svg-icons/content/redo';
 import ContentAddCircleOutline from 'material-ui/svg-icons/content/add-circle-outline';
 import ImageColorLens from 'material-ui/svg-icons/image/color-lens';
 
+import { SwatchesPicker } from 'react-color';
+
 
 import InkStore from '../stores/InkStore.js';
 
@@ -18,6 +22,14 @@ export default class Graphic extends Component{
 
   constructor(props){
     super(props);
+
+    super();
+    this.state = {
+      color: InkStore.getColour(),
+      displayColorPicker: false,
+    };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClose = this.handleClose.bind(this);
 
     this.color = InkStore.getColour();
     console.log(InkStore.getColour());
@@ -40,7 +52,22 @@ export default class Graphic extends Component{
     this.boardDrawn = false;
 
     this.recognitionCallback = this.recognitionCallback.bind(this);
+    this.handleChangeComplete = this.handleChangeComplete.bind(this);
   }
+
+  handleChangeComplete(color){
+    this.setState({ color: color.hex });
+  }
+
+
+  handleClick() {
+    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+  };
+
+  handleClose() {
+    console.log("handle close");
+    this.setState({ displayColorPicker: false });
+  };
 
   test(){
     this.recognitionCanvas.undo();
@@ -64,6 +91,8 @@ export default class Graphic extends Component{
   }
 
   componentDidMount(){
+
+
     this.recognitionCanvas = this.refs.recognitionCanvas;
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
     this.recognitionCanvas.setRecognitionTime(1000);
@@ -253,41 +282,50 @@ export default class Graphic extends Component{
   onColorChange(e){
   		this.color = e.currentTarget.value;
   }
-// <input type="submit" onClick={this.test} value="Clear Sketchpad" id="clearbutton"  />
 
-//         <input type="submit" onClick={this.dollarP} value="$P" id="clearbutton"  />
-//         <input type="submit" onClick={this.dollarN} value="$N" id="clearbutton"  />
-
-//         <form onSubmit={this.addGesture}>
-//           <input type="text" name="gesturename" id="gesturename"/>
-//           <input type="submit" value="Add Geture" id="addgesturebutton"  />
-//         </form>
-//         <form action="">
-//           <input type="radio" name="color" value="#df4b26" onChange={this.onColorChange} defaultChecked={true}/> Red<br/>
-//           <input type="radio" name="color" value="#0000FF" onChange={this.onColorChange}/> Blue<br/>
-//           <input type="radio" name="color" value="#000000" onChange={this.onColorChange}/> Black
-//         </form>      
-//       </div>
-      // <ul>
-      //       {
-      //         this.state.gestureList.map(function(name){
-      //               return <li key ={name}>
-      //                         {name}
-      //                         <input type="submit" name={name} value="Delete" onClick={() => this.deleteGesture(name)} />
-      //                       </li>;
-      //             })
-      //       }
-      //     </ul>
   render(){
+    const popover = {
+      position: 'fixed',
+      "background-color": 'red',
+      bottom: '0',
+      right: '0',
+      zIndex: '2',
+    }
+    const cover = {
+      position: 'relative',
+      top: '0',
+      right: '50px',
+      bottom: '45px',
+      left: '0',
+    }
+    const xd = {
+      position:'fixed',
+      top: screen.height - 20,
+      left:0,
+      width:'100%',
+      height:'60px',
+    }
     return (
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
 
-        <Tabs>
+        { this.state.displayColorPicker ? 
+              <div id="colorPicker" style={ popover }>
+                <div style={ cover } onClick={ this.handleClose }/>
+                <SwatchesPicker />
+            </div> : null }
+
+        <Tabs style={ xd }>
           <Tab icon={<Undo />} />
           <Tab icon={<Redo />} />
           <Tab icon={<ContentAddCircleOutline />} />
-          <Tab className="basics" onActive={this.test} icon={<ImageColorLens />} />
+
+          <Tab className="basics" onActive={ this.handleClick } icon={<ImageColorLens />}>
+            asdf
+        </Tab>
+
+
+            
         </Tabs>
 
         </div>
@@ -313,6 +351,49 @@ class GestureList extends React.Component{
       </ul>    
       );
   }
+}
 
+class ButtonExample extends React.Component {
+  constructor(){
+    super();
+    this.state = {
+      displayColorPicker: false,
+    };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+  }
+
+  handleClick() {
+    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+  };
+
+  handleClose() {
+    console.log("handle close");
+    this.setState({ displayColorPicker: false });
+  };
+
+  render() {
+    const popover = {
+      position: 'absolute',
+      zIndex: '2',
+    }
+    const cover = {
+      position: 'fixed',
+      top: '100px',
+      right: '0',
+      bottom: '0',
+      left: '0',
+    }
+    return (
+      <div>
+        <button onClick={ this.handleClick }>Pick Color</button>
+        { this.state.displayColorPicker ? 
+          <div style={ popover }>
+            <div style={ cover } onChangeComplete={ this.handleChangeComplete } onClick={ this.handleClose }/>
+            <SwatchesPicker />
+          </div> : null }
+      </div>
+    )
+  }
 }
 
