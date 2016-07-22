@@ -120,7 +120,10 @@ export default class Graphic extends Component{
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
     this.recognitionCanvas.setRecognitionTime(1000);
     this.recognitionCanvas.setRecognitionListener(this.recognitionCallback);
-
+    this.recognitionCanvas.enableGesture("Horizontal Line");
+    this.recognitionCanvas.enableGesture("Vertical Line");
+    this.recognitionCanvas.disableGesture("X");
+    this.recognitionCanvas.disableGesture("O");
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
   }
@@ -135,9 +138,9 @@ export default class Graphic extends Component{
 
   recognitionCallback(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
     console.log("recognized: "       + shape);
-    //console.log("score: "            + score);
-    //console.log("centreOfGestureX: " + centreOfGestureX);
-    //console.log("centreOfGestureY: " + centreOfGestureY);
+    console.log("score: "            + score);
+    console.log("centreOfGestureX: " + centreOfGestureX);
+    console.log("centreOfGestureY: " + centreOfGestureY);
     console.log("stroke count:" + pointArray.length);
     console.log("point count:"  + pointArray[0].length);
 
@@ -152,10 +155,6 @@ export default class Graphic extends Component{
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
 
-      console.log("Square Number: " + squareNumber);
-      console.log("Row: " + row);
-      console.log("Column: " + column);
-
       if(shape == "X"){
         this.board[row][column] = "X";
       }
@@ -165,6 +164,10 @@ export default class Graphic extends Component{
 
       if(this.checkWinLogic()){
         this.recognitionCanvas.clearCanvas();
+        this.recognitionCanvas.enableGesture("Horizontal Line");
+        this.recognitionCanvas.enableGesture("Vertical Line");
+        this.recognitionCanvas.disableGesture("X");
+        this.recognitionCanvas.disableGesture("O");
       }
     }
     else{
@@ -198,6 +201,10 @@ export default class Graphic extends Component{
     if(!this.boardDrawn){
       if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
         this.boardDrawn = true;
+        this.recognitionCanvas.disableGesture("Horizontal Line");
+        this.recognitionCanvas.disableGesture("Vertical Line");
+        this.recognitionCanvas.enableGesture("X");
+        this.recognitionCanvas.enableGesture("O");
         this.snackBarMessage = "Board has been drawn";
         this.setState({ showSnackbar: true });
       }

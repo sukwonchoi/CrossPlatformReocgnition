@@ -88,6 +88,9 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
+
+		console.log(this.pointArray);
+
 		if(this.recognitionAlgorithm == '$p')
 			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
 		else if(this.recognitionAlgorithm == "$n")
@@ -119,12 +122,16 @@ export default class RecognitionCanvas extends Component{
 		this.clearCanvas();
 	}
 
-	addBeautification(name, algorithm){
+	disableGesture(gesture){
+		this.$P.DisableGesture(gesture);
+	}
 
+	enableGesture(gesture){
+		this.$P.EnableGesture(gesture);
 	}
 
 	deleteGesture(name){
-		//TODO: Delete logic
+		
 	}
 
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
@@ -406,7 +413,7 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	sketchpad_mouseMove(e){
-    if(this.paint){
+    	if(this.paint){
 			this.addClick(e.pageX - this.canvas.offsetLeft, e.pageY - this.canvas.offsetTop);
 			this.redraw();
 		}

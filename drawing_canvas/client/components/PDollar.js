@@ -88,7 +88,7 @@ export function Result(name, score) // constructor
 // PDollarRecognizer class constants
 //
 // var NumPointClouds = 16;
-var NumPointClouds = 2;
+var NumPointClouds = 4;
 var NumPoints = 32;
 var Origin = new Point(0,0,0);
 //
@@ -99,7 +99,9 @@ export function PDollarRecognizer() // constructor
 	//
 	// one predefined point-cloud for each gesture
 	//
-	this.PointClouds = new Array(NumPointClouds);
+	this.PointClouds = new Array(NumPointClouds);	
+
+	this.GestureBlacklist = new Array();
 
 	this.PointClouds[0] = new PointCloud("X", new Array(
 		new Point(30,146,1),new Point(106,222,1),
@@ -115,7 +117,6 @@ export function PDollarRecognizer() // constructor
 	this.PointClouds[3] = new PointCloud("Vertical Line", new Array(
 		new Point(347,12,1),new Point(347,119,1)
 	));
-
 
 	 //this.PointClouds[0] = new PointCloud("T", new Array(
 	 //	new Point(30,7,1),new Point(103,7,1),
@@ -196,14 +197,17 @@ export function PDollarRecognizer() // constructor
 		var u = -1;
 		for (var i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
 		{
-			var d = GreedyCloudMatch(points, this.PointClouds[i]);
-			if (d < b) {
-				b = d; // best (least) distance
-				u = i; // point-cloud
+			if(!this.GestureBlacklist.includes(this.PointClouds[i].Name)){
+				var d = GreedyCloudMatch(points, this.PointClouds[i]);
+				if (d < b) {
+					b = d; // best (least) distance
+					u = i; // point-cloud
+				}
 			}
 		}
 		return (u == -1) ? new Result("No match.", 0.0) : new Result(this.PointClouds[u].Name, Math.max((b - 2.0) / -2.0, 0.0));
 	};
+
 	this.AddGesture = function(name, points)
 	{
 		this.PointClouds[this.PointClouds.length] = new PointCloud(name, points);
@@ -213,11 +217,23 @@ export function PDollarRecognizer() // constructor
 				num++;
 		}
 		return num;
-	}
+	};
+
 	this.DeleteUserGestures = function()
 	{
 		this.PointClouds.length = NumPointClouds; // clear any beyond the original set
 		return NumPointClouds;
+	};
+	
+	this.DisableGesture = function(gesture){
+		this.GestureBlacklist.push(gesture);
+	};
+
+	this.EnableGesture	 = function(gesture){
+		var i = this.GestureBlacklist.indexOf(gesture);
+		if(i != -1) {
+			this.GestureBlacklist.splice(i, 1);
+		}
 	}
 }
 //
