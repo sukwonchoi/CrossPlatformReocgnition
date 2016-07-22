@@ -96,14 +96,11 @@ export default class RecognitionCanvas extends Component{
 
 		if(this.recognitionAlgorithm == '$p'){
 			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
-			console.log("$P");
 		}
 		else if(this.recognitionAlgorithm == "$n"){
 			this.shapeDetected(this.$N.Recognize(this.strokes).Name, this.$N.Recognize(this.strokes).Score, this.getXCentre(), this.getYCentre());
-			console.log("$N");
 		}
 		else if(this.recognitionAlgorithm == "hybrid"){
-			console.log("hybrid");
 			if(this.$P.Recognize(this.pointArray).Score > this.$N.Recognize(this.strokes).Score)
 				this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
 			else
