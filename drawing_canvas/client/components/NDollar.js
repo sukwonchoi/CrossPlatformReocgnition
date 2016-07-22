@@ -128,7 +128,7 @@ function Result(name, score) // constructor
 //
 // NDollarRecognizer class constants
 //
-var NumMultistrokes = 16;
+var NumMultistrokes = 4;
 var NumPoints = 96;
 var SquareSize = 250.0;
 var OneDThreshold = 0.25; // customize to desired gesture set (usually 0.20 - 0.35)
@@ -149,7 +149,27 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 	// one predefined multistroke for each multistroke type
 	//
 	this.Multistrokes = new Array(NumMultistrokes);
-	this.Multistrokes[0] = new Multistroke("T", useBoundedRotationInvariance, new Array(
+	this.GestureBlacklist = new Array();
+	this.Multistrokes[0] = new Multistroke("X", useBoundedRotationInvariance, new Array(
+		new Array(new Point(30,146),new Point(106,222)),
+		new Array(new Point(30,225),new Point(106,146))
+	));
+	this.Multistrokes[1] = new Multistrokes("O", useBoundedRotationInvariance, new Array(
+		new Array(new Point(345,9,1),new Point(345,87,1),new Point(351,8,2),new Point(363,8,2),new Point(372,9,2),
+				  new Point(380,11,2),new Point(386,14,2),new Point(391,17,2),new Point(394,22,2),new Point(397,28,2),
+				  new Point(399,34,2),new Point(400,42,2),new Point(400,50,2),new Point(400,56,2),new Point(399,61,2),
+				  new Point(397,66,2),new Point(394,70,2),new Point(391,74,2),new Point(386,78,2),new Point(382,81,2),
+				  new Point(377,83,2),new Point(372,85,2),new Point(367,87,2),new Point(360,87,2),new Point(355,88,2),new Point(349,87,2)
+		)
+	));
+	this.Multistrokes[2] = new Multistroke("Horizontal Line", useBoundedRotationInvariance, new Array(
+		new Array(new Point(12,347),new Point(119,347))
+	));
+	this.Multistrokes[3] = new Multistroke("Vertical Line", useBoundedRotationInvariance, new Array(
+		new Array(new Point(347,12),new Point(347,12))
+	));
+
+	/*this.Multistrokes[0] = new Multistroke("T", useBoundedRotationInvariance, new Array(
 		new Array(new Point(30,7),new Point(103,7)),
 		new Array(new Point(66,7),new Point(66,87))
 	));
@@ -165,10 +185,6 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 	this.Multistrokes[3] = new Multistroke("P", useBoundedRotationInvariance, new Array(
 		new Array(new Point(507,8),new Point(507,87)),
 		new Array(new Point(513,7),new Point(528,7),new Point(537,8),new Point(544,10),new Point(550,12),new Point(555,15),new Point(558,18),new Point(560,22),new Point(561,27),new Point(562,33),new Point(561,37),new Point(559,42),new Point(556,45),new Point(550,48),new Point(544,51),new Point(538,53),new Point(532,54),new Point(525,55),new Point(519,55),new Point(513,55),new Point(510,55))
-	));
-	this.Multistrokes[4] = new Multistroke("X", useBoundedRotationInvariance, new Array(
-		new Array(new Point(30,146),new Point(106,222)),
-		new Array(new Point(30,225),new Point(106,146))
 	));
 	this.Multistrokes[5] = new Multistroke("H", useBoundedRotationInvariance, new Array(
 		new Array(new Point(188,137),new Point(188,225)),
@@ -214,7 +230,8 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 	this.Multistrokes[15] = new Multistroke("half-note", useBoundedRotationInvariance, new Array(
 		new Array(new Point(546,465),new Point(546,531)),
 		new Array(new Point(540,530),new Point(536,529),new Point(533,528),new Point(529,529),new Point(524,530),new Point(520,532),new Point(515,535),new Point(511,539),new Point(508,545),new Point(506,548),new Point(506,554),new Point(509,558),new Point(512,561),new Point(517,564),new Point(521,564),new Point(527,563),new Point(531,560),new Point(535,557),new Point(538,553),new Point(542,548),new Point(544,544),new Point(546,540),new Point(546,536))
-	));
+	));*/
+
 	//
 	// The $N Gesture Recognizer API begins here -- 3 methods: Recognize(), AddGesture(), and DeleteUserGestures()
 	//
@@ -235,20 +252,23 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 		var u = -1;
 		for (var i = 0; i < this.Multistrokes.length; i++) // for each multistroke
 		{
-			if (!requireSameNoOfStrokes || strokes.length == this.Multistrokes[i].NumStrokes) // optional -- only attempt match when same # of component strokes
+			if(!this.GestureBlacklist.includes(this.Multistrokes[i].Name))
 			{
-				for (var j = 0; j < this.Multistrokes[i].Unistrokes.length; j++) // each unistroke within this multistroke
+				if (!requireSameNoOfStrokes || strokes.length == this.Multistrokes[i].NumStrokes) // optional -- only attempt match when same # of component strokes
 				{
-					if (AngleBetweenUnitVectors(startv, this.Multistrokes[i].Unistrokes[j].StartUnitVector) <= AngleSimilarityThreshold) // strokes start in the same direction
+					for (var j = 0; j < this.Multistrokes[i].Unistrokes.length; j++) // each unistroke within this multistroke
 					{
-						var d;
-						if (useProtractor) // for Protractor
-							d = OptimalCosineDistance(this.Multistrokes[i].Unistrokes[j].Vector, vector);
-						else // Golden Section Search (original $N)
-							d = DistanceAtBestAngle(points, this.Multistrokes[i].Unistrokes[j], -AngleRange, +AngleRange, AnglePrecision);
-						if (d < b) {
-							b = d; // best (least) distance
-							u = i; // multistroke owner of unistroke
+						if (AngleBetweenUnitVectors(startv, this.Multistrokes[i].Unistrokes[j].StartUnitVector) <= AngleSimilarityThreshold) // strokes start in the same direction
+						{
+							var d;
+							if (useProtractor) // for Protractor
+								d = OptimalCosineDistance(this.Multistrokes[i].Unistrokes[j].Vector, vector);
+							else // Golden Section Search (original $N)
+								d = DistanceAtBestAngle(points, this.Multistrokes[i].Unistrokes[j], -AngleRange, +AngleRange, AnglePrecision);
+							if (d < b) {
+								b = d; // best (least) distance
+								u = i; // multistroke owner of unistroke
+							}
 						}
 					}
 				}
@@ -265,11 +285,23 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 				num++;
 		}
 		return num;
-	}
+	};
+
 	this.DeleteUserGestures = function()
 	{
 		this.Multistrokes.length = NumMultistrokes; // clear any beyond the original set
 		return NumMultistrokes;
+	};
+
+	this.DisableGesture = function(gesture){
+		this.GestureBlacklist.push(gesture);
+	};
+
+	this.EnableGesture	 = function(gesture){
+		var i = this.GestureBlacklist.indexOf(gesture);
+		if(i != -1) {
+			this.GestureBlacklist.splice(i, 1);
+		}
 	}
 }
 //
