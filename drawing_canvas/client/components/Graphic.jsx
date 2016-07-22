@@ -5,6 +5,7 @@ import RecognitionCanvas from './RecognitionCanvas.jsx'
 import ColorPicker from './ColorPicker.jsx'
 
 import {Tabs, Tab} from 'material-ui/Tabs';
+import {Snackbar} from 'material-ui/Snackbar';
 import FontIcon from 'material-ui/FontIcon';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
 import AvReplay from 'material-ui/svg-icons/av/replay';
@@ -27,6 +28,7 @@ export default class Graphic extends Component{
     this.state = {
       color: InkStore.getColour(),
       displayColorPicker: false,
+      openBoardDrawn: false
     };
     this.handleClick = this.handleClick.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -56,14 +58,17 @@ export default class Graphic extends Component{
 
     this.recognitionCallback = this.recognitionCallback.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.snackBarClose = this.snackBarClose.bind(this);
+
+    this.snackBarMessage = "";
   }
 
   callUndo(){
-
+    this.recognitionCanvas.undo();
   }
 
   callRedo(){
-    
+    this.recognitionCanvas.redo();
   }
 
   handleChange(color){
@@ -104,9 +109,12 @@ export default class Graphic extends Component{
     })
   }
 
+  snackBarClose(){
+    this.snackBarMessage = "";
+    this.setState({ openBoardDrawn: false });
+  }
+
   componentDidMount(){
-
-
     this.recognitionCanvas = this.refs.recognitionCanvas;
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
     this.recognitionCanvas.setRecognitionTime(1000);
@@ -175,6 +183,8 @@ export default class Graphic extends Component{
 
     if(this.verticalLines.length == 2 && this.horizontalLines.length == 2){
       this.boardDrawn = true;
+      this.snackBarMessage = "Board has been drawn";
+      this.setState({ openBoardDrawn: true });
     }
 
     console.log("Board Drawn: " + this.boardDrawn);
@@ -338,6 +348,13 @@ export default class Graphic extends Component{
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
 
+         <Snackbar
+          open={this.state.openBoardDrawn}
+          message={this.snackBarMessage}
+          autoHideDuration={2000}
+          onRequestClose={this.snackBarClose}
+        />
+
         { this.state.displayColorPicker ? 
               <div id="colorPicker" style={ popover }>
                 <div style={ cover } onClick={ this.handleClose }/>
@@ -345,8 +362,8 @@ export default class Graphic extends Component{
             </div> : null }
 
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
-          <Tab icon={<Undo />} style ={ tabStyle }/>
-          <Tab icon={<Redo />} style ={ tabStyle }/>
+          <Tab onActive={this.callUndo} icon={<Undo />} style ={ tabStyle }/>
+          <Tab onActive={this.callRedo} icon={<Redo />} style ={ tabStyle }/>
           <Tab icon={<ContentAddCircleOutline />} style ={ tabStyle }/>
 
           <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }>
@@ -355,25 +372,6 @@ export default class Graphic extends Component{
 
         </div>
         
-      );
-  }
-}
-
-class GestureList extends React.Component{
-
-  render(){
-    return(
-      <ul>
-          {this.props.gesture.map(function(name){
-            return (
-            <li key={name}>
-              {name}
-              <input type="submit" value="Delete" onClick={this.props.deleteGesture} />
-            </li>
-            );
-          })
-        }
-      </ul>    
       );
   }
 }

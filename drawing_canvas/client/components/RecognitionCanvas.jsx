@@ -66,6 +66,9 @@ export default class RecognitionCanvas extends Component{
 
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
+
+		this.undoStorage = null;
+		this.undoColor = null;
 	}
 
 	componentWillMount(){
@@ -164,12 +167,15 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	undo(){
-		
-
+		this.undoStorage = this.drawingPoints.pop();
+		this.undoColor = this.colorsForDrawing.pop();
+		this.redrawAll();
 	}
 	
 	redo(){
-
+		this.drawingPoints.push(this.undoStorage);
+		this.colorsForDrawing.push(this.undoColor);
+		this.redrawAll();
 	}
 
 	delete(numberOfStrokesAgo){
