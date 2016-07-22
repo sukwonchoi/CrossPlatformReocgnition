@@ -4,9 +4,7 @@ import RecognitionCanvas from './RecognitionCanvas.jsx'
 
 import ColorPicker from './ColorPicker.jsx'
 
-import {Tabs, Tab} from 'material-ui/Tabs';
-import {Snackbar} from 'material-ui/Snackbar';
-import FontIcon from 'material-ui/FontIcon';
+import {Tabs, Tab, Snackbar, FontIcon} from 'material-ui';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
 import AvReplay from 'material-ui/svg-icons/av/replay';
 import Undo from 'material-ui/svg-icons/content/undo';
@@ -28,7 +26,7 @@ export default class Graphic extends Component{
     this.state = {
       color: InkStore.getColour(),
       displayColorPicker: false,
-      openBoardDrawn: false
+      showSnackbar: false,
     };
     this.handleClick = this.handleClick.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -50,6 +48,9 @@ export default class Graphic extends Component{
     this.callUndo = this.callUndo.bind(this);
     this.callRedo = this.callRedo.bind(this);
 
+    this.undoCallback = this.undoCallback.bind(this);
+    this.redoCallback = this.redoCallback.bind(this);
+
     //Board/Game-state logic
     this.horizontalLines = new Array();
     this.verticalLines = new Array();
@@ -60,7 +61,7 @@ export default class Graphic extends Component{
     this.handleChange = this.handleChange.bind(this);
     this.snackBarClose = this.snackBarClose.bind(this);
 
-    this.snackBarMessage = "";
+    this.snackBarMessage = "Hi";
   }
 
   callUndo(){
@@ -111,7 +112,7 @@ export default class Graphic extends Component{
 
   snackBarClose(){
     this.snackBarMessage = "";
-    this.setState({ openBoardDrawn: false });
+    this.setState({ showSnackbar: false });
   }
 
   componentDidMount(){
@@ -124,6 +125,14 @@ export default class Graphic extends Component{
     window.canvas = this.canvas;
   }
 
+  undoCallback(){
+
+  }
+
+  redoCallback(){
+
+  }
+
   recognitionCallback(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
     console.log("recognized: "       + shape);
     //console.log("score: "            + score);
@@ -134,8 +143,9 @@ export default class Graphic extends Component{
 
     if(this.boardDrawn){
       if(shape == "Horizontal Line" || shape == "Vertical Lines"){
-        // undo
-        // warn
+        this.recognitionCanvas.undo();
+        this.snackBarMessage = "Please draw the X or O";
+        this.setState({ showSnackbar: true });
         return;
       }
       var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
@@ -153,18 +163,21 @@ export default class Graphic extends Component{
         this.board[row][column] = "O";
       }
 
-      console.log("Square number: " + squareNumber);
-      console.log("Did someone win?: " + this.checkWinLogic(row, column, shape));
+      if(this.checkWinLogic()){
+        this.recognitionCanvas.clearCanvas();
+      }
     }
     else{
       if(shape == "X" || shape == "O"){
-        //undo
-        //warn
+        this.recognitionCanvas.undo();
+        this.snackBarMessage = "Please draw the board first";
+        this.setState({ showSnackbar: true });
       }
       else if(shape == "Horizontal Line"){
         if(this.horizontalLines.length == 2){
-          //undo
-          //warn
+          this.recognitionCanvas.undo();
+          this.snackBarMessage = "Please draw the vertical lines";
+          this.setState({ showSnackbar: true });
         }
         else{
           this.horizontalLines.push(pointArray[0]);
@@ -172,8 +185,9 @@ export default class Graphic extends Component{
       }
       else if(shape == "Vertical Line"){
         if(this.verticalLines.length == 2){
-          //undo
-          //warn
+          this.recognitionCanvas.undo();
+          this.snackBarMessage = "Please draw the horizontal lines";
+          this.setState({ showSnackbar: true });
         }
         else{
           this.verticalLines.push(pointArray[0]);
@@ -181,10 +195,12 @@ export default class Graphic extends Component{
       }
     }
 
-    if(this.verticalLines.length == 2 && this.horizontalLines.length == 2){
-      this.boardDrawn = true;
-      this.snackBarMessage = "Board has been drawn";
-      this.setState({ openBoardDrawn: true });
+    if(!this.boardDrawn){
+      if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
+        this.boardDrawn = true;
+        this.snackBarMessage = "Board has been drawn";
+        this.setState({ showSnackbar: true });
+      }
     }
 
     console.log("Board Drawn: " + this.boardDrawn);
@@ -209,8 +225,8 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        alert(s + " wins!");
-        console.log(s + "wins!");
+        this.snackBarMessage = s + " wins!";
+        this.setState({ showSnackbar: true });
         return true;
       }
     }
@@ -221,8 +237,8 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        alert(s + " wins!");
-        console.log(s + "wins!");
+        this.snackBarMessage = s + " wins!";
+        this.setState({ showSnackbar: true });
         return true;
       }
     }
@@ -235,8 +251,8 @@ export default class Graphic extends Component{
           break;
         }
         if(i == n-1){
-          alert(s + " wins!");
-          console.log(s + "wins!");
+          this.snackBarMessage = s + " wins!";
+          this.setState({ showSnackbar: true });
           return true;
         }
       }
@@ -248,9 +264,8 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-
-        alert(s + " wins!");
-        console.log(s + "wins!");
+        this.snackBarMessage = s + " wins!";
+        this.setState({ showSnackbar: true });
         return true;
       }
     }
@@ -314,8 +329,8 @@ export default class Graphic extends Component{
 
     const popover = {
       position: 'fixed',
-      bottom: bottom,
-      right: right,
+      bottom: '50%',
+      right: '50%',
       zIndex: '2',
     }
     const cover = {
@@ -344,15 +359,20 @@ export default class Graphic extends Component{
       width:'0px',
     }
 
+    const snackBarStyle = {
+      bottom: '60px',
+    }
+
     return (
       <div>
         <RecognitionCanvas ref="recognitionCanvas"/>
 
          <Snackbar
-          open={this.state.openBoardDrawn}
+          open={this.state.showSnackbar}
           message={this.snackBarMessage}
-          autoHideDuration={2000}
+          autoHideDuration={3000}
           onRequestClose={this.snackBarClose}
+          style={snackBarStyle}
         />
 
         { this.state.displayColorPicker ? 

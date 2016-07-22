@@ -186,7 +186,11 @@ export default class RecognitionCanvas extends Component{
 	    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	    this.strokes.length = 0;
 	    this.pointArray.length = 0;
+	    this.drawingPoints
 	    this.moveCount = 0;
+	    this.colorsForDrawing.length = 0;
+	    this.undoStorage = null;
+		this.undoColor = null;
 	}
 
 	setColor(color){	
@@ -225,8 +229,6 @@ export default class RecognitionCanvas extends Component{
 			return;
 		}
 		this.context.lineTo(this.strokes[currentStroke][currentDot].X, this.strokes[currentStroke][currentDot].Y);
-		
-		
 		this.context.closePath();
 		this.context.stroke();
 	}
