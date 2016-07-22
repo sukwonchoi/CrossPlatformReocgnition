@@ -62,6 +62,7 @@ export default class Graphic extends Component{
     this.snackBarClose = this.snackBarClose.bind(this);
 
     this.snackBarMessage = "Hi";
+    this.lastShape = "";
   }
 
   callUndo(){
@@ -154,6 +155,15 @@ export default class Graphic extends Component{
       var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
+
+      if(this.lastShape == shape){
+        this.recognitionCanvas.undo();
+        this.snackBarMessage = "It is not your turn!";
+        this.setState({ showSnackbar: true });
+        return;
+      }
+
+      this.lastShape = shape;
 
       if(shape == "X"){
         this.board[row][column] = "X";
