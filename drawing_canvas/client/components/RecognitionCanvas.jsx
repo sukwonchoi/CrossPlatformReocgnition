@@ -286,9 +286,12 @@ export default class RecognitionCanvas extends Component{
 				xArray.push(points[i].X);
 				yArray.push(points[i].Y);
 			}
-			for(var i = 0; i < points2.length; i++){
+
+			if(!(points2 === undefined)){
+				for(var i = 0; i < points2.length; i++){
 				xArray.push(points2[i].X);
 				yArray.push(points2[i].Y);
+				}
 			}
 
 			var xMax = Math.max.apply(Math, xArray);
