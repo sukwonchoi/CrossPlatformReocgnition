@@ -13,13 +13,13 @@ export default class RecognitionCanvas extends Component{
 		//Recognizers
 		this.$P = new PDollarRecognizer();
 		this.$N = new NDollarRecognizer(true);
-		window.n = this.$N;
 		
 		//$P point array
 		this.pointArray = new Array();
 
 		//$N stroke array
 		this.strokes = new Array();
+		window.strokes = this.strokes;
 
 		//For actual drawing
 		this.drawingPoints = new Array();
@@ -69,6 +69,9 @@ export default class RecognitionCanvas extends Component{
 
 		this.undoStorage = null;
 		this.undoColor = null;
+
+		window.recognize = this.recognize;
+		window.setRecognitionAlgorithm = this.setRecognitionAlgorithm;
 	}
 
 	componentWillMount(){
@@ -89,12 +92,23 @@ export default class RecognitionCanvas extends Component{
 
 	recognize(){
 
-		console.log(this.pointArray);
+		console.log("RECOGNIZE");
 
-		if(this.recognitionAlgorithm == '$p')
+		if(this.recognitionAlgorithm == '$p'){
 			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
-		else if(this.recognitionAlgorithm == "$n")
-			this.shapeDetected(this.$N.Recognize());
+			console.log("$P");
+		}
+		else if(this.recognitionAlgorithm == "$n"){
+			this.shapeDetected(this.$N.Recognize(this.strokes).Name, this.$N.Recognize(this.strokes).Score, this.getXCentre(), this.getYCentre());
+			console.log("$N");
+		}
+		else if(this.recognitionAlgorithm == "hybrid"){
+			console.log("hybrid");
+			if(this.$P.Recognize(this.pointArray).Score > this.$N.Recognize(this.strokes).Score)
+				this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
+			else
+				this.shapeDetected(this.$N.Recognize(this.strokes).Name, this.$N.Recognize(this.strokes).Score, this.getXCentre(), this.getYCentre());
+		}
 	}
 	
 	setRecognitionAlgorithm(recognitionAlgorithm){
@@ -136,7 +150,7 @@ export default class RecognitionCanvas extends Component{
 
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
 		var newDrawingPoints = new Array();
-
+		console.log(shape);
 		while(this.strokeCount > 0)
 		{
 			newDrawingPoints.push(this.strokes[this.strokes.length - this.strokeCount]);
