@@ -36,6 +36,12 @@ export default class RecognitionCanvas extends Component{
 		//Timeout for stroke bundling into a single gesture
 		this.timeoutHandler = null;
 
+		this.color = "#000000";
+
+		//For color of gestures
+		this.colorsForDrawing = new Array();
+
+		//Method binding
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
 		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
 		this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
@@ -221,11 +227,12 @@ export default class RecognitionCanvas extends Component{
 
 	redrawAll(){
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.context.strokeStyle = this.color;
 		this.context.lineJoin = "round";
 		this.context.lineWidth = 5;
 
 		for(var i = 0; i < this.drawingPoints.length; i++){
+			this.context.strokeStyle = this.colorsForDrawing[i];
+			console.log(this.colorsForDrawing[i]);
 			for(var j = 0; j < this.drawingPoints[i].length; j++){
 				for(var k = 0; k < this.drawingPoints[i][j].length; k++){
 					this.context.beginPath();
@@ -372,7 +379,10 @@ export default class RecognitionCanvas extends Component{
 		}
 		else{
 			console.log("shape not found");
+			return;
 		}
+
+		this.colorsForDrawing.push(this.color);
 	}
 
 	sketchpad_mouseDown(e){
@@ -404,8 +414,9 @@ export default class RecognitionCanvas extends Component{
 	sketchpad_touchStart(e){
 		this.getTouchPos();
 		this.paint = true;
+		this.strokes.push(new Array());
 
-		this.addClick(this.touchX, this.touchY, true);
+		this.addClick(this.touchX, this.touchY);
 		this.redraw();
 
 		e.preventDefault();
@@ -415,7 +426,7 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 
 		if(this.paint){
-			this.addClick(this.touchX, this.touchY, true);
+			this.addClick(this.touchX, this.touchY);
 			this.redraw();
 		}
 		e.preventDefault();

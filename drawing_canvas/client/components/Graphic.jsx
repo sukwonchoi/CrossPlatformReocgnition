@@ -45,6 +45,9 @@ export default class Graphic extends Component{
     this.dollarP = this.dollarP.bind(this);
     this.dollarN = this.dollarN.bind(this);
 
+    this.callUndo = this.callUndo.bind(this);
+    this.callRedo = this.callRedo.bind(this);
+
     //Board/Game-state logic
     this.horizontalLines = new Array();
     this.verticalLines = new Array();
@@ -52,13 +55,24 @@ export default class Graphic extends Component{
     this.boardDrawn = false;
 
     this.recognitionCallback = this.recognitionCallback.bind(this);
-    this.handleChangeComplete = this.handleChangeComplete.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChangeComplete(color){
+  callUndo(){
+
+  }
+
+  callRedo(){
+    
+  }
+
+  handleChange(color){
+    console.log(color);
     this.setState({ color: color.hex });
-  }
+    this.setState({ displayColorPicker: false});
+    this.recognitionCanvas.setColor(this.state.color);
 
+  }
 
   handleClick() {
     this.setState({ displayColorPicker: !this.state.displayColorPicker });
@@ -284,20 +298,24 @@ export default class Graphic extends Component{
   }
 
   render(){
+
+    var right = Math.round(screen.width / 4);
+    var bottom = Math.round(screen.height / 4);
+
     const popover = {
       position: 'fixed',
-      "background-color": 'red',
-      bottom: '0',
-      right: '0',
+      bottom: bottom,
+      right: right,
       zIndex: '2',
     }
     const cover = {
       position: 'relative',
-      top: '0',
+      top: 0,
       right: '50px',
       bottom: '45px',
-      left: '0',
+      left: 0,
     }
+
     const tabsStyle = {
       position:'fixed',
       bottom:0,
@@ -305,6 +323,7 @@ export default class Graphic extends Component{
       width:'100%',
       height:'60px',
     }
+
     const tabStyle = {
       height: '60px',
     }
@@ -322,7 +341,7 @@ export default class Graphic extends Component{
         { this.state.displayColorPicker ? 
               <div id="colorPicker" style={ popover }>
                 <div style={ cover } onClick={ this.handleClose }/>
-                <SwatchesPicker />
+                <SwatchesPicker onChangeComplete={ this.handleChange }/>
             </div> : null }
 
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
@@ -358,48 +377,3 @@ class GestureList extends React.Component{
       );
   }
 }
-
-class ButtonExample extends React.Component {
-  constructor(){
-    super();
-    this.state = {
-      displayColorPicker: false,
-    };
-    this.handleClick = this.handleClick.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-  }
-
-  handleClick() {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
-  };
-
-  handleClose() {
-    console.log("handle close");
-    this.setState({ displayColorPicker: false });
-  };
-
-  render() {
-    const popover = {
-      position: 'absolute',
-      zIndex: '2',
-    }
-    const cover = {
-      position: 'fixed',
-      top: '100px',
-      right: '0',
-      bottom: '0',
-      left: '0',
-    }
-    return (
-      <div>
-        <button onClick={ this.handleClick }>Pick Color</button>
-        { this.state.displayColorPicker ? 
-          <div style={ popover }>
-            <div style={ cover } onChangeComplete={ this.handleChangeComplete } onClick={ this.handleClose }/>
-            <SwatchesPicker />
-          </div> : null }
-      </div>
-    )
-  }
-}
-
