@@ -12,7 +12,7 @@ export default class RecognitionCanvas extends Component{
 
 		//Recognizers
 		this.$P = new PDollarRecognizer();
-		this.$N = new NDollarRecognizer(true);
+		this.$N = new NDollarRecognizer(false);
 		
 		//$P point array
 		this.pointArray = new Array();
@@ -91,9 +91,6 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
-
-		console.log("RECOGNIZE");
-
 		if(this.recognitionAlgorithm == '$p'){
 			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
 		}

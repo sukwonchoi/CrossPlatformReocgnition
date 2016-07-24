@@ -237,7 +237,12 @@ export default class Graphic extends Component{
 
   checkWinLogic(x, y, s){
     var n = 3;
+    console.log(this.board);
     for(i = 0; i < n; i++){
+      console.log("x" + x);
+      console.log("i" + i);
+      console.log("s" + s);
+
       if(this.board[x][i] != s){
         break;
       }

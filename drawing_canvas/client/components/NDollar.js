@@ -154,7 +154,7 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 		new Array(new Point(30,146),new Point(106,222)),
 		new Array(new Point(30,225),new Point(106,146))
 	));
-	this.Multistrokes[1] = new Multistrokes("O", useBoundedRotationInvariance, new Array(
+	this.Multistrokes[1] = new Multistroke("O", useBoundedRotationInvariance, new Array(
 		new Array(new Point(345,9,1),new Point(345,87,1),new Point(351,8,2),new Point(363,8,2),new Point(372,9,2),
 				  new Point(380,11,2),new Point(386,14,2),new Point(391,17,2),new Point(394,22,2),new Point(397,28,2),
 				  new Point(399,34,2),new Point(400,42,2),new Point(400,50,2),new Point(400,56,2),new Point(399,61,2),
@@ -162,12 +162,13 @@ export function NDollarRecognizer(useBoundedRotationInvariance) // constructor
 				  new Point(377,83,2),new Point(372,85,2),new Point(367,87,2),new Point(360,87,2),new Point(355,88,2),new Point(349,87,2)
 		)
 	));
-	this.Multistrokes[2] = new Multistroke("Horizontal Line", useBoundedRotationInvariance, new Array(
+	this.Multistrokes[2] = new Multistroke("Vertical Line", useBoundedRotationInvariance, new Array(
+		new Array(new Point(347,12),new Point(347,119))
+	));
+	this.Multistrokes[3] = new Multistroke("Horizontal Line", useBoundedRotationInvariance, new Array(
 		new Array(new Point(12,347),new Point(119,347))
 	));
-	this.Multistrokes[3] = new Multistroke("Vertical Line", useBoundedRotationInvariance, new Array(
-		new Array(new Point(347,12),new Point(347,12))
-	));
+	
 
 	/*this.Multistrokes[0] = new Multistroke("T", useBoundedRotationInvariance, new Array(
 		new Array(new Point(30,7),new Point(103,7)),
