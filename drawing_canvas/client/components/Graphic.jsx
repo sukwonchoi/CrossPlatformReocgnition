@@ -121,6 +121,8 @@ export default class Graphic extends Component{
     this.recognitionCanvas.setRecognitionAlgorithm("$p");
     this.recognitionCanvas.setRecognitionTime(1000);
     this.recognitionCanvas.setRecognitionListener(this.recognitionCallback);
+    this.recognitionCanvas.setUndoListener(this.undoCallback);
+    this.recognitionCanvas.setRedoListener(this.redoCallback);
     this.recognitionCanvas.enableGesture("Horizontal Line");
     this.recognitionCanvas.enableGesture("Vertical Line");
     this.recognitionCanvas.disableGesture("X");
@@ -129,12 +131,52 @@ export default class Graphic extends Component{
     window.canvas = this.canvas;
   }
 
-  undoCallback(){
+  undoCallback(undoShape, undoXCentre, undoYCentre, undoPointArray){
+    if(undoShape == "X" || undoShape == "O"){
+      var squareNumber = this.getSquareNumber(undoXCentre, undoYCentre);
+      var row = Math.floor((squareNumber-1) / 3);
+      var column = (squareNumber-1) % 3;
+      this.board[row][column] = "";
 
+      if(undoShape == "X"){
+        this.lastShape = "O";
+      }
+      else{
+        this.lastShape = "X";
+      }
+    }
+    else{
+      if(undoShape == "Vertical Line"){
+        this.verticalLines.pop();
+      }
+      else if(undoShape == "Horizontal Line"){
+        this.horizontalLines.pop();
+      }
+    }
+
+    this.snackBarMessage = "Called undo on shape: " + undoShape;
+    this.setState({ showSnackbar: true });
   }
 
-  redoCallback(){
+  redoCallback(redoShape, redoXCentre, redoYCentre, redoPointArray){
+    if(redoShape == "X" || redoShape == "O"){
+      var squareNumber = this.getSquareNumber(redoXCentre, redoYCentre);
+      var row = Math.floor((squareNumber-1) / 3);
+      var column = (squareNumber-1) % 3;
+      this.board[row][column] = redoShape;
+      this.lastShape = redoShape;
+    }
+    else{
+      if(redoShape == "Vertical Line"){
+        this.verticalLines.push(redoPointArray[0]);
+      }
+      else if(redoShape == "Horizontal Line"){
+        this.horizontalLines.push(redoPointArray[0]);
+      }
+    }
 
+    this.snackBarMessage = "Called redo on shape: " + redoShape;
+    this.setState({ showSnackbar: true });
   }
 
   recognitionCallback(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
@@ -146,7 +188,7 @@ export default class Graphic extends Component{
     console.log("point count:"  + pointArray[0].length);
 
     if(this.boardDrawn){
-      if(shape == "Horizontal Line" || shape == "Vertical Lines"){
+      if(shape == "Horizontal Line" || shape == "Vertical Line"){
         this.recognitionCanvas.undo();
         this.snackBarMessage = "Please draw the X or O";
         this.setState({ showSnackbar: true });
@@ -164,15 +206,9 @@ export default class Graphic extends Component{
       }
 
       this.lastShape = shape;
+      this.board[row][column] = shape;
 
-      if(shape == "X"){
-        this.board[row][column] = "X";
-      }
-      else if(shape == "O"){
-        this.board[row][column] = "O";
-      }
-
-      if(this.checkWinLogic()){
+      if(this.checkWinLogic(row, column, shape)){
         this.recognitionCanvas.clearCanvas();
         this.recognitionCanvas.enableGesture("Horizontal Line");
         this.recognitionCanvas.enableGesture("Vertical Line");
@@ -187,23 +223,19 @@ export default class Graphic extends Component{
         this.setState({ showSnackbar: true });
       }
       else if(shape == "Horizontal Line"){
-        if(this.horizontalLines.length == 2){
+        this.horizontalLines.push(pointArray[0]);
+        if(this.horizontalLines.length > 2){
           this.recognitionCanvas.undo();
           this.snackBarMessage = "Please draw the vertical lines";
           this.setState({ showSnackbar: true });
         }
-        else{
-          this.horizontalLines.push(pointArray[0]);
-        }
       }
       else if(shape == "Vertical Line"){
-        if(this.verticalLines.length == 2){
+        this.verticalLines.push(pointArray[0]);
+        if(this.verticalLines.length > 2){
           this.recognitionCanvas.undo();
           this.snackBarMessage = "Please draw the horizontal lines";
           this.setState({ showSnackbar: true });
-        }
-        else{
-          this.verticalLines.push(pointArray[0]);
         }
       }
     }
@@ -239,10 +271,6 @@ export default class Graphic extends Component{
     var n = 3;
     console.log(this.board);
     for(i = 0; i < n; i++){
-      console.log("x" + x);
-      console.log("i" + i);
-      console.log("s" + s);
-
       if(this.board[x][i] != s){
         break;
       }

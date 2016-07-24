@@ -30,6 +30,10 @@ export default class RecognitionCanvas extends Component{
 		this.recognitionTime = 600;
 		this.recognitionListener = null;
 
+		//Undo/Redo settings
+		this.undoListener = null;
+		this.redoListener = null;
+
 		//Beautification settings
 		this.doBeautification = false;
 
@@ -40,6 +44,15 @@ export default class RecognitionCanvas extends Component{
 
 		//For color of gestures
 		this.colorsForDrawing = new Array();
+
+		//For x centres
+		this.xCentre = new Array();
+
+		//For y centres
+		this.yCentre = new Array();
+
+		//For shapes
+		this.shapes = new Array();
 
 		//Method binding
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
@@ -63,15 +76,17 @@ export default class RecognitionCanvas extends Component{
 		this.setRecognitionAlgorithm = this.setRecognitionAlgorithm.bind(this);
 		this.setRecognitionTime = this.setRecognitionTime.bind(this);
 		this.setRecognitionListener = this.setRecognitionListener.bind(this);
+		this.setRedoListener = this.setRedoListener.bind(this);
+		this.setUndoListener = this.setUndoListener.bind(this);
 
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
 
 		this.undoStorage = null;
 		this.undoColor = null;
-
-		window.recognize = this.recognize;
-		window.setRecognitionAlgorithm = this.setRecognitionAlgorithm;
+		this.undoXCentre = null;
+		this.undoYCentre = null;
+		this.undoShapes = null;
 	}
 
 	componentWillMount(){
@@ -117,6 +132,14 @@ export default class RecognitionCanvas extends Component{
 		this.recognitionListener = listener;
 	}
 
+	setUndoListener(listener){
+		this.undoListener = listener;
+	}
+
+	setRedoListener(listener){
+		this.redoListener = listener;
+	}
+
 	enableBeautification(){
 		this.doBeautification = true;
 	}
@@ -151,6 +174,10 @@ export default class RecognitionCanvas extends Component{
 			this.strokeCount--;
 		}
 		this.drawingPoints.push(newDrawingPoints);
+		this.colorsForDrawing.push(this.color);
+		this.xCentre.push(centreOfGestureX);
+		this.yCentre.push(centreOfGestureY);
+		this.shapes.push(shape);
 		this.beautifyLast(shape);
 		this.redrawAll();
 		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.drawingPoints[this.drawingPoints.length - 1]);
@@ -184,24 +211,28 @@ export default class RecognitionCanvas extends Component{
 	undo(){
 		this.undoStorage = this.drawingPoints.pop();
 		this.undoColor = this.colorsForDrawing.pop();
+		this.undoXCentre = this.xCentre.pop();
+		this.undoYCentre = this.yCentre.pop();
+		this.undoShapes = this.shapes.pop();
+		this.undoListener(this.undoShapes, this.undoXCentre, this.undoYCentre, this.undoStorage);
 		this.redrawAll();
 	}
 	
 	redo(){
 		this.drawingPoints.push(this.undoStorage);
 		this.colorsForDrawing.push(this.undoColor);
+		this.xCentre.push(this.undoXCentre);
+		this.yCentre.push(this.undoYCentre);
+		this.shapes.push(this.undoShapes);
+		this.redoListener(this.undoShapes, this.undoXCentre, this.undoYCentre, this.undoStorage);
 		this.redrawAll();
-	}
-
-	delete(numberOfStrokesAgo){
-
 	}
 
 	clearCanvas(){
 	    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	    this.strokes.length = 0;
 	    this.pointArray.length = 0;
-	    this.drawingPoints
+	    this.drawingPoints.length = 0;
 	    this.moveCount = 0;
 	    this.colorsForDrawing.length = 0;
 	    this.undoStorage = null;
@@ -407,8 +438,6 @@ export default class RecognitionCanvas extends Component{
 			console.log("shape not found");
 			return;
 		}
-
-		this.colorsForDrawing.push(this.color);
 	}
 
 	sketchpad_mouseDown(e){
