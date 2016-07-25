@@ -11,6 +11,7 @@ import Undo from 'material-ui/svg-icons/content/undo';
 import Redo from 'material-ui/svg-icons/content/redo';
 import ContentAddCircleOutline from 'material-ui/svg-icons/content/add-circle-outline';
 import ImageColorLens from 'material-ui/svg-icons/image/color-lens';
+import Replay from 'material-ui/svg-icons/av/replay';
 
 import { SwatchesPicker } from 'react-color';
 
@@ -47,6 +48,8 @@ export default class Graphic extends Component{
 
     this.callUndo = this.callUndo.bind(this);
     this.callRedo = this.callRedo.bind(this);
+    this.clearCanvas = this.clearCanvas.bind(this);
+    window.clearCanvas = this.clearCanvas;
 
     this.undoCallback = this.undoCallback.bind(this);
     this.redoCallback = this.redoCallback.bind(this);
@@ -71,6 +74,18 @@ export default class Graphic extends Component{
 
   callRedo(){
     this.recognitionCanvas.redo();
+  }
+
+  clearCanvas(){
+    console.log('clear canvas');
+    this.recognitionCanvas.clearCanvas();
+    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+    this.horizontalLines.length = 0;
+    this.verticalLines.length = 0;
+    this.boardDrawn = false;
+
+    this.snackBarMessage = "Canvas cleared";
+    this.setState({ showSnackbar: true });
   }
 
   handleChange(color){
@@ -461,8 +476,7 @@ export default class Graphic extends Component{
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
           <Tab onActive={this.callUndo} icon={<Undo />} style ={ tabStyle }/>
           <Tab onActive={this.callRedo} icon={<Redo />} style ={ tabStyle }/>
-          <Tab icon={<ContentAddCircleOutline />} style ={ tabStyle }/>
-
+          <Tab onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
           <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }>
           </Tab>  
         </Tabs>
