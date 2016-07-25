@@ -7,7 +7,7 @@ import MainMenu from './components/MainMenu.jsx';
 import Graphic from './components/Graphic.jsx';
 import Settings from './components/Settings.jsx';
 
-import RecognitionCanvas from './components/RecognitionCanvas.jsx'
+import RecognitionCanvas from './components/RecognitionCanvas/RecognitionCanvas.jsx'
 
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';

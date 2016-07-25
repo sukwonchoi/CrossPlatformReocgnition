@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-import { Point, PDollarRecognizer } from './PDollar.js'
-import RecognitionCanvas from './RecognitionCanvas.jsx'
-
+import RecognitionCanvas from './RecognitionCanvas/RecognitionCanvas.jsx'
 import ColorPicker from './ColorPicker.jsx'
-
 import {Tabs, Tab, Snackbar, FontIcon} from 'material-ui';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
 import AvReplay from 'material-ui/svg-icons/av/replay';
@@ -14,8 +11,6 @@ import ImageColorLens from 'material-ui/svg-icons/image/color-lens';
 import Replay from 'material-ui/svg-icons/av/replay';
 
 import { SwatchesPicker } from 'react-color';
-
-
 import InkStore from '../stores/InkStore.js';
 
 export default class Graphic extends Component{
