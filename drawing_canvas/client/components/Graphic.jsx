@@ -206,7 +206,16 @@ export default class Graphic extends Component{
       }
 
       this.lastShape = shape;
-      this.board[row][column] = shape;
+      if(this.board[row][column] == ""){
+        this.board[row][column] = shape;
+      }
+      else{
+        this.recognitionCanvas.undo();
+        this.snackBarMessage = "Draw somewhere else!";
+        this.setState({ showSnackbar: true });
+        return;
+      }
+
 
       if(this.checkWinLogic(row, column, shape)){
         this.recognitionCanvas.clearCanvas();
@@ -214,6 +223,11 @@ export default class Graphic extends Component{
         this.recognitionCanvas.enableGesture("Vertical Line");
         this.recognitionCanvas.disableGesture("X");
         this.recognitionCanvas.disableGesture("O");
+        this.horizontalLines = new Array();
+        this.verticalLines = new Array();
+        this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+        this.boardDrawn = false;
+        this.lastShape = "";
       }
     }
     else{
@@ -320,7 +334,19 @@ export default class Graphic extends Component{
       }
     }
 
-    return false;
+    //check if game is finished
+    for(i = 0; i < n; i++){
+      for(j = 0; j < n; j++){
+        if(this.board[i][j] == ""){
+          return false;
+        }
+      }
+    }
+
+    //if game is finished and no winner, its a draw
+    this.snackBarMessage = "It's a draw!";
+    this.setState({ showSnackbar: true });
+    return true;
   }
 
   getSquareNumber(x, y){
@@ -383,6 +409,7 @@ export default class Graphic extends Component{
       right: '50%',
       zIndex: '2',
     }
+
     const cover = {
       position: 'relative',
       top: 0,
