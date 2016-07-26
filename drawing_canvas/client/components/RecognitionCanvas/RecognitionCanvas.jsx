@@ -36,6 +36,11 @@ export default class RecognitionCanvas extends Component{
 		//Undo/Redo settings
 		this.undoListener = props.undoListener;
 		this.redoListener = props.redoListener;
+		this.clearCanvasListener = props.clearCanvasListener;
+
+		//width height
+		this.recognitionCanvasWidth = props.width;
+		this.recognitionCanvasHeight = props.height;
 
 		//Beautification settings
 		this.doBeautification = props.beautification;
@@ -68,12 +73,8 @@ export default class RecognitionCanvas extends Component{
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
 
-		//Action booleans
-		this.state = {
-	      doUndo: props.undo,
-	      doRedo: props.redo,
-	      doClearCanvas: props.clearCanvas,
-	    };
+		this.$P.DisableGesture(props.disabledGestures);
+		this.$P.EnableGesture(props.enabledGestures);
 	}
 
 	componentWillMount(){
@@ -93,10 +94,10 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	componentWillReceiveProps(nextProps){
-		
-		console.log("Undo: " + nextProps.undo);
-		console.log("Redo: " + nextProps.redo);
-		console.log("Clear Canvas: " + nextProps.clearCanvas);
+
+		console.log("Undo:" + nextProps.undo);
+		console.log("Redo:" + nextProps.redo);
+		console.log("Clear canvas:" + nextProps.clearCanvas);
 
 		if(nextProps.undo){
 			this.undo();
@@ -107,11 +108,18 @@ export default class RecognitionCanvas extends Component{
 		else if(nextProps.clearCanvas){
 			this.clearCanvas();
 		}
+
+		this.$P.DisableGesture(nextProps.disabledGestures);
+		this.$P.EnableGesture(nextProps.enabledGestures	);
+		this.recognitionTime = nextProps.recognitionTime;
 	}
 
 	recognize(){
 		var resultP = this.$P.Recognize(this.pointArray);
 		var resultN = this.$N.Recognize(this.strokes);
+
+		console.log(resultP);
+		console.log(this.pointArray);
 
 		if(this.recognitionAlgorithm == '$p'){
 			this.shapeDetected(resultP.Name, resultP.Score, this.getXCentre(), this.getYCentre());
@@ -136,17 +144,8 @@ export default class RecognitionCanvas extends Component{
 		this.clearCanvas();
 	}
 
-	disableGesture(gesture){
-		this.$P.DisableGesture(gesture);
-	}
-
-	enableGesture(gesture){
-		this.$P.EnableGesture(gesture);
-	}
-
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){
 		var newDrawingPoints = new Array();
-		console.log(shape);
 		while(this.strokeCount > 0)
 		{
 			newDrawingPoints.push(this.strokes[this.strokes.length - this.strokeCount]);
@@ -161,25 +160,19 @@ export default class RecognitionCanvas extends Component{
 
 	getXCentre(){
 		var xCentre = 0;
-		
 		for(var x = 0; x < this.pointArray.length - 1; x++){
 			xCentre += this.pointArray[x].X;
 		}
-
 		xCentre /= this.pointArray.length;
-
 		return Math.round(xCentre);
 	}
 
 	getYCentre(){
 		var yCentre = 0;
-
 		for(var y = 0; y < this.pointArray.length - 1; y++){
 			yCentre += this.pointArray[y].Y;
 		}
-
 		yCentre /= this.pointArray.length;
-
 		return Math.round(yCentre);
 	}
 
@@ -191,7 +184,7 @@ export default class RecognitionCanvas extends Component{
 	
 	redo(){
 		this.drawingPoints.push(this.undoStorage);
-		this.redoListener(this,undoStorage);
+		this.redoListener(this.undoStorage);
 		this.redrawAll();
 	}
 
@@ -200,10 +193,9 @@ export default class RecognitionCanvas extends Component{
 	    this.strokes.length = 0;
 	    this.pointArray.length = 0;
 	    this.drawingPoints.length = 0;
-	    this.moveCount = 0;
-	    this.colorsForDrawing.length = 0;
+	    this.strokeCount = 0;
 	    this.undoStorage = null;
-		this.undoColor = null;
+	    this.clearCanvasListener();
 	}
 
 	setColor(color){	
@@ -336,8 +328,8 @@ export default class RecognitionCanvas extends Component{
 
 	render(){
 		return(
-			<canvas width={screen.width} height={screen.height - 120} ref="canvas" />
+			<canvas width={this.recognitionCanvasWidth} height={this.recognitionCanvasHeight} ref="canvas" />
 			);
 	}
 
-}
+}	

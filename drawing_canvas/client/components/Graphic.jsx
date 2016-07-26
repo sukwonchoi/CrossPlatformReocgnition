@@ -17,9 +17,6 @@ export default class Graphic extends Component{
 
   constructor(props){
     super(props);
-
-    super();
-    
     this.state = {
       color: InkStore.getColour(),
       displayColorPicker: false,
@@ -27,7 +24,7 @@ export default class Graphic extends Component{
       enabledGestures: ["Vertical Line", "Horizontal Line"],
       disabledGestures: ["X", "O"],
       recognitionAlgorithm: "$p",
-      recognitionTime: 1000,
+      recognitionTime: 0,
       redo: false,
       undo: false,
       color: InkStore.getColour(),
@@ -47,6 +44,7 @@ export default class Graphic extends Component{
 
     this.undoCallback = this.undoCallback.bind(this);
     this.redoCallback = this.redoCallback.bind(this);
+    this.clearCanvasCallback = this.clearCanvasCallback.bind(this);
 
     //Board/Game-state logic
     this.horizontalLines = new Array();
@@ -74,16 +72,17 @@ export default class Graphic extends Component{
   }
 
   clearCanvas(){
-    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
-    this.horizontalLines.length = 0;
-    this.verticalLines.length = 0;
-    this.boardDrawn = false;
-
-    this.snackBarMessage = "Canvas cleared";
-    this.setState({ 
-      showSnackbar: true,
-      clearRecognitionCanvas: true
+    this.setState({
+      enabledGestures: ["Vertical Line", "Horizontal Line"],
+      disabledGestures: ["X", "O"],
+      clearRecognitionCanvas: true,
     });
+    
+    this.horizontalLines = new Array();
+    this.verticalLines = new Array();
+    this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+    this.boardDrawn = false;
+    this.lastShape = "";
   }
 
   handleChange(color){
@@ -121,7 +120,6 @@ export default class Graphic extends Component{
   }
 
   undoCallback(gesture){
-
     var undoShape = gesture.shape;
     var undoXCentre = gesture.centreX;
     var undoYCentre = gesture.centreY;
@@ -185,6 +183,12 @@ export default class Graphic extends Component{
     });
   }
 
+  clearCanvasCallback(){
+    this.setState({
+      clearRecognitionCanvas: false,
+    });
+  }
+
   recognitionCallback(gesture){
     var shape = gesture.shape;
     var score = gesture.score;
@@ -236,16 +240,20 @@ export default class Graphic extends Component{
 
 
       if(this.checkWinLogic(row, column, shape)){
-        this.setState({
-          enabledGestures: ["Vertical Line", "Horizontal Line"],
-          disabledGestures: ["X", "O"],
-          clearRecognitionCanvas: true,
-        });
-        this.horizontalLines = new Array();
-        this.verticalLines = new Array();
         this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
+        this.horizontalLines.length = 0;
+        this.verticalLines.length = 0;
         this.boardDrawn = false;
         this.lastShape = "";
+
+        this.snackBarMessage = shape + " wins!";
+        this.setState({ 
+          showSnackbar: true,
+          clearRecognitionCanvas: true,
+          enabledGestures: ["Vertical Line", "Horizontal Line"],
+          disabledGestures: ["X", "O"],
+          recognitionTime: 0,
+        });
       }
     }
     else{
@@ -285,6 +293,7 @@ export default class Graphic extends Component{
         this.setState({
           disabledGestures: ["Vertical Line", "Horizontal Line"],
           enabledGestures: ["X", "O"],
+          recognitionTime: 1000,
           showSnackbar: true,
         });
       }
@@ -307,7 +316,6 @@ export default class Graphic extends Component{
 
   checkWinLogic(x, y, s){
     var n = 3;
-    console.log(this.board);
     for(i = 0; i < n; i++){
       if(this.board[x][i] != s){
         break;
@@ -346,7 +354,7 @@ export default class Graphic extends Component{
       }
     }
 
-            //check anti diag (thanks rampion)
+    //check anti diag (thanks rampion)
     for(i = 0;i<n;i++){
       if(this.board[i][(n-1)-i] != s){
         break;
@@ -374,10 +382,6 @@ export default class Graphic extends Component{
   }
 
   getSquareNumber(x, y){
-
-    console.log("X: " + x);
-    console.log("Y: " + y);
-
     var xLeft = this.verticalLines[0][0].X < this.verticalLines[1][0].X ? this.verticalLines[0][0].X : this.verticalLines[1][0].X;
     var xRight = this.verticalLines[0][0].X > this.verticalLines[1][0].X ? this.verticalLines[0][0].X : this.verticalLines[1][0].X;
     var yTop = this.horizontalLines[0][0].Y > this.horizontalLines[1][0].Y ? this.horizontalLines[0][0].Y : this.horizontalLines[1][0].Y;
@@ -469,6 +473,7 @@ export default class Graphic extends Component{
     const recognitionListener = this.recognitionCallback;
     const undoListener = this.undoCallback;
     const redoListener = this.redoCallback;
+    const clearCanvasListener = this.clearCanvasCallback;
 
     return (
       <div>
@@ -478,11 +483,16 @@ export default class Graphic extends Component{
           recognitionListener={recognitionListener}
           undoListener={undoListener}
           redoListener={redoListener}
+          clearCanvasListener={clearCanvasListener}
           undo={this.state.undo}
           redo={this.state.redo}
           beautification={true}
           color={this.state.color}
           clearCanvas={this.state.clearRecognitionCanvas}
+          width={screen.width}
+          height={screen.height - 120}
+          disabledGestures={this.state.disabledGestures}
+          enabledGestures={this.state.enabledGestures}
           ref="recognitionCanvas"
         />
 
