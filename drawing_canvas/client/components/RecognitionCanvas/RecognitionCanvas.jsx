@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Point, PDollarRecognizer } from './PDollar.js'
+import { Point, Result, PDollarRecognizer } from './PDollar.js'
 import { NDollarRecognizer } from './NDollar.js'
 import { Beautifier } from './Beautifier.js'
+import { Gesture } from './Gesture.js'
 
 import InkStore from '../../stores/InkStore.js';
 
@@ -108,17 +109,21 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
+
+		var resultP = this.$P.Recognize(this.pointArray);
+		var resultN = this.$N.Recognize(this.strokes);
+
 		if(this.recognitionAlgorithm == '$p'){
-			this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
+			this.shapeDetected(resultP.Name, resultP.Score, this.getXCentre(), this.getYCentre());
 		}
 		else if(this.recognitionAlgorithm == "$n"){
-			this.shapeDetected(this.$N.Recognize(this.strokes).Name, this.$N.Recognize(this.strokes).Score, this.getXCentre(), this.getYCentre());
+			this.shapeDetected(resultN.Name, resultN.Score, this.getXCentre(), this.getYCentre());
 		}
 		else if(this.recognitionAlgorithm == "hybrid"){
-			if(this.$P.Recognize(this.pointArray).Score > this.$N.Recognize(this.strokes).Score)
-				this.shapeDetected(this.$P.Recognize(this.pointArray).Name, this.$P.Recognize(this.pointArray).Score, this.getXCentre(), this.getYCentre());
+			if(resultP.Score > resultN.Score)
+				this.shapeDetected(resultP.Name, resultP.Score, this.getXCentre(), this.getYCentre());
 			else
-				this.shapeDetected(this.$N.Recognize(this.strokes).Name, this.$N.Recognize(this.strokes).Score, this.getXCentre(), this.getYCentre());
+				this.shapeDetected(resultN.Name, resultN.Score, this.getXCentre(), this.getYCentre());
 		}
 	}
 	
@@ -175,14 +180,10 @@ export default class RecognitionCanvas extends Component{
 			newDrawingPoints.push(this.strokes[this.strokes.length - this.strokeCount]);
 			this.strokeCount--;
 		}
-		this.drawingPoints.push(newDrawingPoints);
-		this.colorsForDrawing.push(this.color);
-		this.xCentre.push(centreOfGestureX);
-		this.yCentre.push(centreOfGestureY);
-		this.shapes.push(shape);
-		this.drawingPoints.push(this.beautifier.Beautify(shape, this.drawingPoints.pop()));
+		var gesture = new Gesture(centreOfGestureX, centreOfGestureY, this.beautifier.Beautify(shape, newDrawingPoints), this.color, shape, score);
+		this.drawingPoints.push(gesture);
 		this.redrawAll();
-		this.recognitionListener(shape, score, centreOfGestureX, centreOfGestureY, this.drawingPoints[this.drawingPoints.length - 1]);
+		this.recognitionListener(gesture);
 		this.pointArray.length = 0;
 	}
 
@@ -212,21 +213,13 @@ export default class RecognitionCanvas extends Component{
 
 	undo(){
 		this.undoStorage = this.drawingPoints.pop();
-		this.undoColor = this.colorsForDrawing.pop();
-		this.undoXCentre = this.xCentre.pop();
-		this.undoYCentre = this.yCentre.pop();
-		this.undoShapes = this.shapes.pop();
-		this.undoListener(this.undoShapes, this.undoXCentre, this.undoYCentre, this.undoStorage);
+		this.undoListener(this.undoStorage);
 		this.redrawAll();
 	}
 	
 	redo(){
 		this.drawingPoints.push(this.undoStorage);
-		this.colorsForDrawing.push(this.undoColor);
-		this.xCentre.push(this.undoXCentre);
-		this.yCentre.push(this.undoYCentre);
-		this.shapes.push(this.undoShapes);
-		this.redoListener(this.undoShapes, this.undoXCentre, this.undoYCentre, this.undoStorage);
+		this.redoListener(this,undoStorage);
 		this.redrawAll();
 	}
 
@@ -287,23 +280,25 @@ export default class RecognitionCanvas extends Component{
 		this.context.lineWidth = 5;
 
 		for(var i = 0; i < this.drawingPoints.length; i++){
-			this.context.strokeStyle = this.colorsForDrawing[i];
-			console.log(this.colorsForDrawing[i]);
-			for(var j = 0; j < this.drawingPoints[i].length; j++){
-				for(var k = 0; k < this.drawingPoints[i][j].length; k++){
+			this.context.strokeStyle = this.drawingPoints[i].color;
+			var gestureStrokes = this.drawingPoints[i].strokes;
+			for(var j = 0; j < gestureStrokes.length; j++){
+				var stroke = gestureStrokes[j];
+				for(var k = 0; k < stroke.length; k++){
+					console.log("Hi");
 					this.context.beginPath();
 					if(k > 0){
-						this.context.moveTo(this.drawingPoints[i][j][k-1].X, this.drawingPoints[i][j][k-1].Y);
+						this.context.moveTo(stroke[k-1].X, stroke[k-1].Y);
 					}
 					else if(k == 0){
-						this.context.moveTo(this.drawingPoints[i][j][k].X, this.drawingPoints[i][j][k].Y)
+						this.context.moveTo(stroke[k].X, stroke[k].Y)
 					}
 					else{
 						this.context.closePath();
 						this.context.stroke();
 						continue;
 					}
-					this.context.lineTo(this.drawingPoints[i][j][k].X, this.drawingPoints[i][j][k].Y);
+					this.context.lineTo(stroke[k].X, stroke[k].Y);
 					this.context.closePath();
 					this.context.stroke();
 				}
@@ -314,11 +309,8 @@ export default class RecognitionCanvas extends Component{
 	sketchpad_mouseDown(e){
 		this.mouseX = e.pageX - this.canvas.offsetLeft;
 		this.mouseY = e.pageY - this.canvas.offsetTop;
-
 		this.paint = true;
-
 		this.strokes.push(new Array());
-
 		this.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
 		this.redraw();
 	}
@@ -341,16 +333,13 @@ export default class RecognitionCanvas extends Component{
 		this.getTouchPos();
 		this.paint = true;
 		this.strokes.push(new Array());
-
 		this.addClick(this.touchX, this.touchY);
 		this.redraw();
-
 		e.preventDefault();
 	}
 
 	sketchpad_touchMove(e){
 		this.getTouchPos();
-
 		if(this.paint){
 			this.addClick(this.touchX, this.touchY);
 			this.redraw();

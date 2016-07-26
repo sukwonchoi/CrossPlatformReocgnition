@@ -141,7 +141,13 @@ export default class Graphic extends Component{
     window.canvas = this.canvas;
   }
 
-  undoCallback(undoShape, undoXCentre, undoYCentre, undoPointArray){
+  undoCallback(gesture){
+
+    var undoShape = gesture.shape;
+    var undoXCentre = gesture.centreX;
+    var undoYCentre = gesture.centreY;
+    var undoPointArray = gesture.strokes;
+
     if(undoShape == "X" || undoShape == "O"){
       var squareNumber = this.getSquareNumber(undoXCentre, undoYCentre);
       var row = Math.floor((squareNumber-1) / 3);
@@ -168,7 +174,12 @@ export default class Graphic extends Component{
     this.setState({ showSnackbar: true });
   }
 
-  redoCallback(redoShape, redoXCentre, redoYCentre, redoPointArray){
+  redoCallback(gesture){
+    var redoShape = gesture.shape;
+    var redoXCentre = gesture.centreX;
+    var redoYCentre = gesture.centreY;
+    var redoPointArray = gesture.strokes;
+
     if(redoShape == "X" || redoShape == "O"){
       var squareNumber = this.getSquareNumber(redoXCentre, redoYCentre);
       var row = Math.floor((squareNumber-1) / 3);
@@ -189,7 +200,14 @@ export default class Graphic extends Component{
     this.setState({ showSnackbar: true });
   }
 
-  recognitionCallback(shape, score, centreOfGestureX, centreOfGestureY, pointArray){
+  recognitionCallback(gesture){
+
+    var shape = gesture.shape;
+    var score = gesture.score;
+    var centreOfGestureX = gesture.centreX;
+    var centreOfGestureY = gesture.centreY;
+    var pointArray = gesture.strokes;
+
     console.log("recognized: "       + shape);
     console.log("score: "            + score);
     console.log("centreOfGestureX: " + centreOfGestureX);

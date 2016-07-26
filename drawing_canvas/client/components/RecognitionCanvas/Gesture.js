@@ -1,7 +1,9 @@
-export function Gesture(centreX, centreY, color) // constructor
+export function Gesture(centreX, centreY, strokes, color, shape, score) // constructor
 {
-	this.centreX = x;
-	this.centreY = y;
-	this.strokes = new Array();
+	this.centreX = centreX;
+	this.centreY = centreY;
+	this.strokes = strokes,
 	this.color = color;
+	this.shape = shape;
+	this.score = score;
 }
