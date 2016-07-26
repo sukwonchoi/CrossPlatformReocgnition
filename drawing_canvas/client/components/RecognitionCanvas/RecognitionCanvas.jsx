@@ -29,33 +29,21 @@ export default class RecognitionCanvas extends Component{
 		this.strokeCount = 0;
 
 		//Recognition settings
-		this.recognitionAlgorithm = "";
-		this.recognitionTime = 600;
-		this.recognitionListener = null;
+		this.recognitionAlgorithm = props.recognitionAlgorithm;
+		this.recognitionTime = props.recognitionTime;
+		this.recognitionListener = props.recognitionListener;
 
 		//Undo/Redo settings
-		this.undoListener = null;
-		this.redoListener = null;
+		this.undoListener = props.undoListener;
+		this.redoListener = props.redoListener;
 
 		//Beautification settings
-		this.doBeautification = false;
+		this.doBeautification = props.beautification;
 
 		//Timeout for stroke bundling into a single gesture
 		this.timeoutHandler = null;
 
 		this.color = "#000000";
-
-		//For color of gestures
-		this.colorsForDrawing = new Array();
-
-		//For x centres
-		this.xCentre = new Array();
-
-		//For y centres
-		this.yCentre = new Array();
-
-		//For shapes
-		this.shapes = new Array();
 
 		//Method binding
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
@@ -84,12 +72,6 @@ export default class RecognitionCanvas extends Component{
 
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
-
-		this.undoStorage = null;
-		this.undoColor = null;
-		this.undoXCentre = null;
-		this.undoYCentre = null;
-		this.undoShapes = null;
 	}
 
 	componentWillMount(){
@@ -109,7 +91,6 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	recognize(){
-
 		var resultP = this.$P.Recognize(this.pointArray);
 		var resultN = this.$N.Recognize(this.strokes);
 
@@ -125,30 +106,6 @@ export default class RecognitionCanvas extends Component{
 			else
 				this.shapeDetected(resultN.Name, resultN.Score, this.getXCentre(), this.getYCentre());
 		}
-	}
-	
-	setRecognitionAlgorithm(recognitionAlgorithm){
-		this.recognitionAlgorithm = recognitionAlgorithm;
-	}
-
-	setRecognitionTime(time){
-		this.recognitionTime = time;
-	}
-
-	setRecognitionListener(listener){
-		this.recognitionListener = listener;
-	}
-
-	setUndoListener(listener){
-		this.undoListener = listener;
-	}
-
-	setRedoListener(listener){
-		this.redoListener = listener;
-	}
-
-	enableBeautification(){
-		this.doBeautification = true;
 	}
 
 	disableBeautification(){
@@ -166,10 +123,6 @@ export default class RecognitionCanvas extends Component{
 
 	enableGesture(gesture){
 		this.$P.EnableGesture(gesture);
-	}
-
-	deleteGesture(name){
-		
 	}
 
 	shapeDetected(shape, score, centreOfGestureX, centreOfGestureY){

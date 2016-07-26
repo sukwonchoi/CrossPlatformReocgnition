@@ -19,17 +19,24 @@ export default class Graphic extends Component{
     super(props);
 
     super();
+    
     this.state = {
       color: InkStore.getColour(),
       displayColorPicker: false,
       showSnackbar: false,
+      enabledGestures: ["Vertical Line", "Horizontal Line"],
+      disabledGestures: ["X", "O"],
+      recognitionAlgorithm: "$p",
+      recognitionTime: 1000,
+      redo: false,
+      undo: false,
+      color: InkStore.getColour(),
+      clearCanvas: false,
+
     };
+
     this.handleClick = this.handleClick.bind(this);
     this.handleClose = this.handleClose.bind(this);
-
-    this.color = InkStore.getColour();
-    console.log(InkStore.getColour());
-    window.color = this.color;
     
     this.addGesture = this.addGesture.bind(this);
     this.deleteGesture = this.deleteGesture.bind(this);
@@ -64,31 +71,31 @@ export default class Graphic extends Component{
   }
 
   callUndo(){
-    this.recognitionCanvas.undo();
+    this.setState({ undo: true });
   }
 
   callRedo(){
-    this.recognitionCanvas.redo();
+    this.setState({ redo: true });
   }
 
   clearCanvas(){
-    console.log('clear canvas');
-    this.recognitionCanvas.clearCanvas();
     this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
     this.horizontalLines.length = 0;
     this.verticalLines.length = 0;
     this.boardDrawn = false;
 
     this.snackBarMessage = "Canvas cleared";
-    this.setState({ showSnackbar: true });
+    this.setState({ 
+      showSnackbar: true,
+      clearCanvas: true
+    });
   }
 
   handleChange(color){
-    console.log(color);
-    this.setState({ color: color.hex });
-    this.setState({ displayColorPicker: false});
-    this.recognitionCanvas.setColor(this.state.color);
-
+    this.setState({ 
+      color: color.hex,
+      displayColorPicker: false
+    });
   }
 
   handleClick() {
@@ -96,22 +103,8 @@ export default class Graphic extends Component{
   };
 
   handleClose() {
-    console.log("handle close");
     this.setState({ displayColorPicker: false });
   };
-
-  test(){
-    this.recognitionCanvas.undo();
-    this.recognitionCanvas.clearCanvas();
-  }
-  
-  dollarP(){
-    this.recognitionCanvas.setRecognitionAlgorithm("$p");
-  }
-
-  dollarN(){
-    this.recognitionCanvas.setRecognitionAlgorithm("$n");
-  }
 
   componentWillMount(){
     InkStore.on("change", () =>{
@@ -128,15 +121,6 @@ export default class Graphic extends Component{
 
   componentDidMount(){
     this.recognitionCanvas = this.refs.recognitionCanvas;
-    this.recognitionCanvas.setRecognitionAlgorithm("$p");
-    this.recognitionCanvas.setRecognitionTime(1000);
-    this.recognitionCanvas.setRecognitionListener(this.recognitionCallback);
-    this.recognitionCanvas.setUndoListener(this.undoCallback);
-    this.recognitionCanvas.setRedoListener(this.redoCallback);
-    this.recognitionCanvas.enableGesture("Horizontal Line");
-    this.recognitionCanvas.enableGesture("Vertical Line");
-    this.recognitionCanvas.disableGesture("X");
-    this.recognitionCanvas.disableGesture("O");
     this.canvas = this.refs.context;
     window.canvas = this.canvas;
   }
@@ -171,7 +155,10 @@ export default class Graphic extends Component{
     }
 
     this.snackBarMessage = "Called undo on shape: " + undoShape;
-    this.setState({ showSnackbar: true });
+    this.setState({ 
+      showSnackbar: true,
+      undo: false
+    });
   }
 
   redoCallback(gesture){
@@ -197,11 +184,13 @@ export default class Graphic extends Component{
     }
 
     this.snackBarMessage = "Called redo on shape: " + redoShape;
-    this.setState({ showSnackbar: true });
+    this.setState({ 
+      showSnackbar: true,
+      redo: false
+    });
   }
 
   recognitionCallback(gesture){
-
     var shape = gesture.shape;
     var score = gesture.score;
     var centreOfGestureX = gesture.centreX;
@@ -217,9 +206,11 @@ export default class Graphic extends Component{
 
     if(this.boardDrawn){
       if(shape == "Horizontal Line" || shape == "Vertical Line"){
-        this.recognitionCanvas.undo();
         this.snackBarMessage = "Please draw the X or O";
-        this.setState({ showSnackbar: true });
+        this.setState({
+          undo: true,
+          showSnackbar: true
+        });
         return;
       }
       var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
@@ -227,9 +218,11 @@ export default class Graphic extends Component{
       var column = (squareNumber-1) % 3;
 
       if(this.lastShape == shape){
-        this.recognitionCanvas.undo();
         this.snackBarMessage = "It is not your turn!";
-        this.setState({ showSnackbar: true });
+        this.setState({
+          undo: true,
+          showSnackbar: true
+        });
         return;
       }
 
@@ -238,19 +231,21 @@ export default class Graphic extends Component{
         this.board[row][column] = shape;
       }
       else{
-        this.recognitionCanvas.undo();
         this.snackBarMessage = "Draw somewhere else!";
-        this.setState({ showSnackbar: true });
+        this.setState({
+          undo: true,
+          showSnackbar: true
+        });
         return;
       }
 
 
       if(this.checkWinLogic(row, column, shape)){
-        this.recognitionCanvas.clearCanvas();
-        this.recognitionCanvas.enableGesture("Horizontal Line");
-        this.recognitionCanvas.enableGesture("Vertical Line");
-        this.recognitionCanvas.disableGesture("X");
-        this.recognitionCanvas.disableGesture("O");
+        this.setState({
+          enabledGestures: ["Vertical Line", "Horizontal Line"],
+          disabledGestures: ["X", "O"],
+          clearCanvas: true,
+        });
         this.horizontalLines = new Array();
         this.verticalLines = new Array();
         this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
@@ -260,24 +255,30 @@ export default class Graphic extends Component{
     }
     else{
       if(shape == "X" || shape == "O"){
-        this.recognitionCanvas.undo();
         this.snackBarMessage = "Please draw the board first";
-        this.setState({ showSnackbar: true });
+        this.setState({ 
+          showSnackbar: true,
+          undo: true
+        });
       }
       else if(shape == "Horizontal Line"){
         this.horizontalLines.push(pointArray[0]);
         if(this.horizontalLines.length > 2){
-          this.recognitionCanvas.undo();
           this.snackBarMessage = "Please draw the vertical lines";
-          this.setState({ showSnackbar: true });
+          this.setState({ 
+            showSnackbar: true,
+            undo: true
+          });
         }
       }
       else if(shape == "Vertical Line"){
         this.verticalLines.push(pointArray[0]);
         if(this.verticalLines.length > 2){
-          this.recognitionCanvas.undo();
           this.snackBarMessage = "Please draw the horizontal lines";
-          this.setState({ showSnackbar: true });
+          this.setState({ 
+            showSnackbar: true,
+            undo: true
+          });
         }
       }
     }
@@ -285,12 +286,12 @@ export default class Graphic extends Component{
     if(!this.boardDrawn){
       if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
         this.boardDrawn = true;
-        this.recognitionCanvas.disableGesture("Horizontal Line");
-        this.recognitionCanvas.disableGesture("Vertical Line");
-        this.recognitionCanvas.enableGesture("X");
-        this.recognitionCanvas.enableGesture("O");
         this.snackBarMessage = "Board has been drawn";
-        this.setState({ showSnackbar: true });
+        this.setState({
+          disabledGestures: ["Vertical Line", "Horizontal Line"],
+          enabledGestures: ["X", "O"],
+          showSnackbar: true,
+        });
       }
     }
 
@@ -431,6 +432,7 @@ export default class Graphic extends Component{
     var right = Math.round(screen.width / 4);
     var bottom = Math.round(screen.height / 4);
 
+    //Styling
     const popover = {
       position: 'fixed',
       bottom: '50%',
@@ -468,9 +470,26 @@ export default class Graphic extends Component{
       bottom: '60px',
     }
 
+    //API input
+    const recognitionListener = this.recognitionCallback;
+    const undoListener = this.undoCallback;
+    const redoListener = this.redoCallback;
+
     return (
       <div>
-        <RecognitionCanvas ref="recognitionCanvas"/>
+        <RecognitionCanvas 
+          recognitionAlgorithm={this.state.recognitionAlgorithm}
+          recognitionTime={this.state.recognitionTime}
+          recognitionListener={recognitionListener}
+          undoListener={undoListener}
+          redoListener={redoListener}
+          undo={this.state.undo}
+          redo={this.state.redo}
+          beautification={true}
+          color={this.state.color}
+          clearCanvas={this.state.clearCanvas}
+          ref="recognitionCanvas"
+        />
 
          <Snackbar
           open={this.state.showSnackbar}
@@ -494,8 +513,8 @@ export default class Graphic extends Component{
           </Tab>  
         </Tabs>
 
-        </div>
+      </div>
         
-      );
+    );
   }
 }
