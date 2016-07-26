@@ -31,8 +31,7 @@ export default class Graphic extends Component{
       redo: false,
       undo: false,
       color: InkStore.getColour(),
-      clearCanvas: false,
-
+      clearRecognitionCanvas: false,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -43,13 +42,6 @@ export default class Graphic extends Component{
     this.onColorChange = this.onColorChange.bind(this);
     this.getSquareNumber = this.getSquareNumber.bind(this);
 
-    this.test = this.test.bind(this);
-
-    this.dollarP = this.dollarP.bind(this);
-    this.dollarN = this.dollarN.bind(this);
-
-    this.callUndo = this.callUndo.bind(this);
-    this.callRedo = this.callRedo.bind(this);
     this.clearCanvas = this.clearCanvas.bind(this);
     window.clearCanvas = this.clearCanvas;
 
@@ -68,6 +60,9 @@ export default class Graphic extends Component{
 
     this.snackBarMessage = "Hi";
     this.lastShape = "";
+
+    this.callUndo = this.callUndo.bind(this);
+    this.callRedo = this.callRedo.bind(this);
   }
 
   callUndo(){
@@ -87,7 +82,7 @@ export default class Graphic extends Component{
     this.snackBarMessage = "Canvas cleared";
     this.setState({ 
       showSnackbar: true,
-      clearCanvas: true
+      clearRecognitionCanvas: true
     });
   }
 
@@ -244,7 +239,7 @@ export default class Graphic extends Component{
         this.setState({
           enabledGestures: ["Vertical Line", "Horizontal Line"],
           disabledGestures: ["X", "O"],
-          clearCanvas: true,
+          clearRecognitionCanvas: true,
         });
         this.horizontalLines = new Array();
         this.verticalLines = new Array();
@@ -487,7 +482,7 @@ export default class Graphic extends Component{
           redo={this.state.redo}
           beautification={true}
           color={this.state.color}
-          clearCanvas={this.state.clearCanvas}
+          clearCanvas={this.state.clearRecognitionCanvas}
           ref="recognitionCanvas"
         />
 
@@ -508,9 +503,8 @@ export default class Graphic extends Component{
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
           <Tab onActive={this.callUndo} icon={<Undo />} style ={ tabStyle }/>
           <Tab onActive={this.callRedo} icon={<Redo />} style ={ tabStyle }/>
-          <Tab onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
-          <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }>
-          </Tab>  
+          <Tab onActive={ this.clearRecognitionCanvas } icon={<Replay />} style ={ tabStyle }/>
+          <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
         </Tabs>
 
       </div>

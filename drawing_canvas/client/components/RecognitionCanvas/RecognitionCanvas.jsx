@@ -43,7 +43,8 @@ export default class RecognitionCanvas extends Component{
 		//Timeout for stroke bundling into a single gesture
 		this.timeoutHandler = null;
 
-		this.color = "#000000";
+		//Drawing color
+		this.color = props.color;
 
 		//Method binding
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
@@ -62,16 +63,17 @@ export default class RecognitionCanvas extends Component{
 
 		this.recognize = this.recognize.bind(this);
 		this.addGesture = this.addGesture.bind(this);
-		this.deleteGesture = this.deleteGesture.bind(this);
 		this.shapeDetected = this.shapeDetected.bind(this);
-		this.setRecognitionAlgorithm = this.setRecognitionAlgorithm.bind(this);
-		this.setRecognitionTime = this.setRecognitionTime.bind(this);
-		this.setRecognitionListener = this.setRecognitionListener.bind(this);
-		this.setRedoListener = this.setRedoListener.bind(this);
-		this.setUndoListener = this.setUndoListener.bind(this);
 
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
+
+		//Action booleans
+		this.state = {
+	      doUndo: props.undo,
+	      doRedo: props.redo,
+	      doClearCanvas: props.clearCanvas,
+	    };
 	}
 
 	componentWillMount(){
@@ -88,6 +90,23 @@ export default class RecognitionCanvas extends Component{
 		this.canvas.addEventListener('touchstart', this.sketchpad_touchStart, false);
 		this.canvas.addEventListener('touchend', this.sketchpad_touchEnd, false);
 		this.canvas.addEventListener('touchmove', this.sketchpad_touchMove, false);
+	}
+
+	componentWillReceiveProps(nextProps){
+		
+		console.log("Undo: " + nextProps.undo);
+		console.log("Redo: " + nextProps.redo);
+		console.log("Clear Canvas: " + nextProps.clearCanvas);
+
+		if(nextProps.undo){
+			this.undo();
+		}
+		else if(nextProps.redo){
+			this.redo();
+		}
+		else if(nextProps.clearCanvas){
+			this.clearCanvas();
+		}
 	}
 
 	recognize(){
@@ -238,7 +257,6 @@ export default class RecognitionCanvas extends Component{
 			for(var j = 0; j < gestureStrokes.length; j++){
 				var stroke = gestureStrokes[j];
 				for(var k = 0; k < stroke.length; k++){
-					console.log("Hi");
 					this.context.beginPath();
 					if(k > 0){
 						this.context.moveTo(stroke[k-1].X, stroke[k-1].Y);
