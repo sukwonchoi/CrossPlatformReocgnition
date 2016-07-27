@@ -1,16 +1,39 @@
-import React, { Component } from 'react';
-import { Point, Result, PDollarRecognizer } from './PDollar.js'
-import { NDollarRecognizer } from './NDollar.js'
-import { Beautifier } from './Beautifier.js'
-import { Gesture } from './Gesture.js'
-
+import React, { Component, PropTypes } from 'react';
+import { Point, Result, PDollarRecognizer } from './PDollar.js';
+import { NDollarRecognizer } from './NDollar.js';
+import { Beautifier } from './Beautifier.js';
+import { Gesture } from './Gesture.js';
 import InkStore from '../../stores/InkStore.js';
 
+class RecognitionCanvas extends React.Component{
 
-export default class RecognitionCanvas extends Component{
+	static defaultProps = {
+    	color: "#000000",
+    	enabledGestures: [""],
+    	disabledGestures: [""],
+  	}
+
+	static propTypes = {
+	    recognitionAlgorithm: 	React.PropTypes.string.isRequired,
+	    recognitionTime: 		React.PropTypes.number.isRequired,
+	    recognitionListener: 	React.PropTypes.func.isRequired,
+	    undoListener: 			React.PropTypes.func.isRequired,
+	    redoListener: 			React.PropTypes.func.isRequired,
+	    clearCanvasListener: 	React.PropTypes.func.isRequired,
+	    width: 					React.PropTypes.number.isRequired,
+	    height: 				React.PropTypes.number.isRequired,
+	    beautification: 		React.PropTypes.bool,
+	    color: 					React.PropTypes.string,
+	    disabledGestures: 		React.PropTypes.arrayOf(React.PropTypes.string),
+	    enabledGestures: 		React.PropTypes.arrayOf(React.PropTypes.string),
+  	}
 
 	constructor(props){
 		super(props);
+
+		/*
+			VARIABLES
+		*/
 
 		//Recognizers
 		this.$P = new PDollarRecognizer();
@@ -22,11 +45,20 @@ export default class RecognitionCanvas extends Component{
 
 		//$N stroke array
 		this.strokes = new Array();
-		window.strokes = this.strokes;
 
 		//For actual drawing
 		this.drawingPoints = new Array();
 		this.strokeCount = 0;
+
+		//Timeout for stroke bundling into a single gesture
+		this.timeoutHandler = null;
+
+		//Stores undo data
+		this.undoStorage = new Array();
+
+		/*
+ 			PROPS
+		*/
 
 		//Recognition settings
 		this.recognitionAlgorithm = props.recognitionAlgorithm;
@@ -45,36 +77,33 @@ export default class RecognitionCanvas extends Component{
 		//Beautification settings
 		this.doBeautification = props.beautification;
 
-		//Timeout for stroke bundling into a single gesture
-		this.timeoutHandler = null;
-
 		//Drawing color
 		this.color = props.color;
 
-		//Method binding
+		//Disable enable
+		this.$P.DisableGesture(props.disabledGestures);
+		this.$P.EnableGesture(props.enabledGestures);
+
+		/*
+			METHOD BINDING
+		*/
+
 		this.sketchpad_mouseDown = this.sketchpad_mouseDown.bind(this);
 		this.sketchpad_mouseMove = this.sketchpad_mouseMove.bind(this);
 		this.sketchpad_mouseUp = this.sketchpad_mouseUp.bind(this);
 		this.sketchpad_touchStart = this.sketchpad_touchStart.bind(this);
 		this.sketchpad_touchMove = this.sketchpad_touchMove.bind(this);
 		this.sketchpad_touchEnd = this.sketchpad_touchEnd.bind(this);
-
 		this.addClick = this.addClick.bind(this);
 		this.redraw = this.redraw.bind(this);
 		this.redrawAll = this.redrawAll.bind(this);
-
 		this.undo = this.undo.bind(this);
 		this.redo = this.redo.bind(this);
-
 		this.recognize = this.recognize.bind(this);
 		this.addGesture = this.addGesture.bind(this);
 		this.shapeDetected = this.shapeDetected.bind(this);
-
 		this.getXCentre = this.getXCentre.bind(this);
 		this.getYCentre = this.getYCentre.bind(this);
-
-		this.$P.DisableGesture(props.disabledGestures);
-		this.$P.EnableGesture(props.enabledGestures);
 	}
 
 	componentWillMount(){
@@ -94,11 +123,6 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	componentWillReceiveProps(nextProps){
-
-		console.log("Undo:" + nextProps.undo);
-		console.log("Redo:" + nextProps.redo);
-		console.log("Clear canvas:" + nextProps.clearCanvas);
-
 		if(nextProps.undo){
 			this.undo();
 		}
@@ -117,9 +141,6 @@ export default class RecognitionCanvas extends Component{
 	recognize(){
 		var resultP = this.$P.Recognize(this.pointArray);
 		var resultN = this.$N.Recognize(this.strokes);
-
-		console.log(resultP);
-		console.log(this.pointArray);
 
 		if(this.recognitionAlgorithm == '$p'){
 			this.shapeDetected(resultP.Name, resultP.Score, this.getXCentre(), this.getYCentre());
@@ -177,14 +198,14 @@ export default class RecognitionCanvas extends Component{
 	}
 
 	undo(){
-		this.undoStorage = this.drawingPoints.pop();
-		this.undoListener(this.undoStorage);
+		this.undoStorage.push(this.drawingPoints.pop());
+		this.undoListener(this.undoStorage.peek());
 		this.redrawAll();
 	}
 	
 	redo(){
-		this.drawingPoints.push(this.undoStorage);
-		this.redoListener(this.undoStorage);
+		this.drawingPoints.push(this.undoStorage.peek());
+		this.redoListener(this.undoStorage.pop());
 		this.redrawAll();
 	}
 
@@ -333,3 +354,5 @@ export default class RecognitionCanvas extends Component{
 	}
 
 }	
+
+export default RecognitionCanvas

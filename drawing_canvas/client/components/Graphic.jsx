@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import RecognitionCanvas from './RecognitionCanvas/RecognitionCanvas.jsx'
-import ColorPicker from './ColorPicker.jsx'
+import RecognitionCanvas from './RecognitionCanvas/RecognitionCanvas.jsx';
+import ColorPicker from './ColorPicker.jsx';
 import {Tabs, Tab, Snackbar, FontIcon} from 'material-ui';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
 import AvReplay from 'material-ui/svg-icons/av/replay';
@@ -9,15 +9,12 @@ import Redo from 'material-ui/svg-icons/content/redo';
 import ContentAddCircleOutline from 'material-ui/svg-icons/content/add-circle-outline';
 import ImageColorLens from 'material-ui/svg-icons/image/color-lens';
 import Replay from 'material-ui/svg-icons/av/replay';
-
 import { SwatchesPicker } from 'react-color';
 import InkStore from '../stores/InkStore.js';
 
 export default class Graphic extends Component{
 
-  constructor(props){
-    super(props);
-    this.state = {
+  state = {
       color: InkStore.getColour(),
       displayColorPicker: false,
       showSnackbar: false,
@@ -29,36 +26,34 @@ export default class Graphic extends Component{
       undo: false,
       color: InkStore.getColour(),
       clearRecognitionCanvas: false,
-    };
+  };
 
-    this.handleClick = this.handleClick.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    
-    this.addGesture = this.addGesture.bind(this);
-    this.deleteGesture = this.deleteGesture.bind(this);
-    this.onColorChange = this.onColorChange.bind(this);
-    this.getSquareNumber = this.getSquareNumber.bind(this);
-
-    this.clearCanvas = this.clearCanvas.bind(this);
-    window.clearCanvas = this.clearCanvas;
-
-    this.undoCallback = this.undoCallback.bind(this);
-    this.redoCallback = this.redoCallback.bind(this);
-    this.clearCanvasCallback = this.clearCanvasCallback.bind(this);
+  constructor(props){
+    super(props);
 
     //Board/Game-state logic
     this.horizontalLines = new Array();
     this.verticalLines = new Array();
     this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
     this.boardDrawn = false;
+    this.snackBarMessage = "";
+    this.lastShape = "";
 
+    //Function binding
     this.recognitionCallback = this.recognitionCallback.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.snackBarClose = this.snackBarClose.bind(this);
-
-    this.snackBarMessage = "Hi";
-    this.lastShape = "";
-
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.addGesture = this.addGesture.bind(this);
+    this.deleteGesture = this.deleteGesture.bind(this);
+    this.onColorChange = this.onColorChange.bind(this);
+    this.getSquareNumber = this.getSquareNumber.bind(this);
+    this.clearCanvas = this.clearCanvas.bind(this);
+    window.clearCanvas = this.clearCanvas;
+    this.undoCallback = this.undoCallback.bind(this);
+    this.redoCallback = this.redoCallback.bind(this);
+    this.clearCanvasCallback = this.clearCanvasCallback.bind(this);
     this.callUndo = this.callUndo.bind(this);
     this.callRedo = this.callRedo.bind(this);
   }
@@ -82,6 +77,7 @@ export default class Graphic extends Component{
     this.verticalLines = new Array();
     this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
     this.boardDrawn = false;
+    this.snackBarMessage = "";
     this.lastShape = "";
   }
 
@@ -240,12 +236,6 @@ export default class Graphic extends Component{
 
 
       if(this.checkWinLogic(row, column, shape)){
-        this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
-        this.horizontalLines.length = 0;
-        this.verticalLines.length = 0;
-        this.boardDrawn = false;
-        this.lastShape = "";
-
         this.snackBarMessage = shape + " wins!";
         this.setState({ 
           showSnackbar: true,
@@ -254,6 +244,8 @@ export default class Graphic extends Component{
           disabledGestures: ["X", "O"],
           recognitionTime: 0,
         });
+
+        this.clearCanvas();
       }
     }
     else{
