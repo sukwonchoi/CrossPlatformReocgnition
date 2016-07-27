@@ -67,12 +67,6 @@ render(){
 
   return (
     <div>
-      <Drawer
-        docked={false}
-        open={false}>
-        <MenuItem linkButton containerElement={<Link to="/game" />} onTouchTap={() => this.titleHandler("Tic Tac Toe")} primaryText="Tic Tac Toe" />
-        <MenuItem linkButton containerElement={<Link to="/graph" />} onTouchTap={() => this.titleHandler("Swag")} primaryText="NEW STUFF" />
-      </Drawer>
       <AppBar
         style={appBarStyle}
         title={this.state.title}
@@ -80,7 +74,6 @@ render(){
         onLeftIconButtonTouchTap={this._toggle} 
         onLeftIconButtonClick={this._toggle}
       />
-      <Drawer ref="leftNav" docked={false} menuItems={menuItems} />
     </div>
     );
     }

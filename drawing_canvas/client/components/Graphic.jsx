@@ -59,6 +59,9 @@ export default class Graphic extends Component{
     this.callUndo = this.callUndo.bind(this);
     this.callRedo = this.callRedo.bind(this);
     this.endGameSnackBarClose = this.endGameSnackBarClose.bind(this);
+    this.applyShapesToBoard = this.applyShapesToBoard.bind(this);
+    this.applyLinesToBoard = this.applyLinesToBoard.bind(this);
+
 
     this.snackBarClosing = this.snackBarClose;
   }
@@ -191,13 +194,36 @@ export default class Graphic extends Component{
   }
 
   recognitionCallback(gesture){
+    
+    if(this.boardDrawn){
+      this.applyShapesToBoard(gesture);
+    }
+    else{
+      this.applyLinesToBoard(gesture);
+    }
+
+    if(!this.boardDrawn){
+      if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
+        this.boardDrawn = true;
+        this.snackBarMessage = "Board has been drawn";
+        this.setState({
+          disabledGestures: ["Vertical Line", "Horizontal Line"],
+          enabledGestures: ["X", "O"],
+          recognitionTime: 1000,
+          showSnackbar: true,
+        });
+      }
+    }
+  }
+
+  applyShapesToBoard(gesture){
     var shape = gesture.shape;
     var score = gesture.score;
     var centreOfGestureX = gesture.centreX;
     var centreOfGestureY = gesture.centreY;
     var pointArray = gesture.strokes;
-    if(this.boardDrawn){
-      if(score < 0.15){
+
+    if(score < 0.15){
         this.snackBarMessage = "Please draw the shapes more carefully";
         this.gestureArray.push(shape);
         this.setState({ 
@@ -245,9 +271,16 @@ export default class Graphic extends Component{
           showSnackbar: true,
         });
       }
-    }
-    else{
-      if(score < 0.5){
+  }
+
+  applyLinesToBoard(gesture){
+    var shape = gesture.shape;
+    var score = gesture.score;
+    var centreOfGestureX = gesture.centreX;
+    var centreOfGestureY = gesture.centreY;
+    var pointArray = gesture.strokes;
+    
+    if(score < 0.5){
         this.snackBarMessage = "Please draw the lines more carefully";
         if(shape == "Horizontal Line"){
           this.horizontalLines.push(pointArray[0]);
@@ -283,20 +316,6 @@ export default class Graphic extends Component{
           return;
         }
       }
-    }
-
-    if(!this.boardDrawn){
-      if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
-        this.boardDrawn = true;
-        this.snackBarMessage = "Board has been drawn";
-        this.setState({
-          disabledGestures: ["Vertical Line", "Horizontal Line"],
-          enabledGestures: ["X", "O"],
-          recognitionTime: 1000,
-          showSnackbar: true,
-        });
-      }
-    }
   }
 
   addGesture(e){
@@ -425,22 +444,25 @@ export default class Graphic extends Component{
 
   render(){
 
-    var right = Math.round(screen.width / 2);
-    var bottom = Math.round(screen.height / 2);
+    var width = Math.round(screen.width / 2);
+    var height = Math.round(screen.height / 2);
 
     //Styling
     const popover = {
-      position: 'absolute',
-      bottom: '50%',
-      right: '50%',
+      width: width,
+      height: height,
+      position: "absolute",
+      top:0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      margin: "auto",
       zIndex: '2',
     }
 
     const cover = {
       position: 'relative',
       top: 0,
-      right: '50px',
-      bottom: '45px',
       left: 0,
     }
 
