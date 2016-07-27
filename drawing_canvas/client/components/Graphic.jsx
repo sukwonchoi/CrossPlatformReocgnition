@@ -38,6 +38,8 @@ export default class Graphic extends Component{
     this.boardDrawn = false;
     this.snackBarMessage = "";
     this.gestureArray = new Array();
+    this.duration = 3000;
+    this.actionMessage = "";
 
     //Function binding
     this.recognitionCallback = this.recognitionCallback.bind(this);
@@ -56,6 +58,9 @@ export default class Graphic extends Component{
     this.clearCanvasCallback = this.clearCanvasCallback.bind(this);
     this.callUndo = this.callUndo.bind(this);
     this.callRedo = this.callRedo.bind(this);
+    this.endGameSnackBarClose = this.endGameSnackBarClose.bind(this);
+
+    this.snackBarClosing = this.snackBarClose;
   }
 
   callUndo(){
@@ -71,6 +76,7 @@ export default class Graphic extends Component{
       enabledGestures: ["Vertical Line", "Horizontal Line"],
       disabledGestures: ["X", "O"],
       clearRecognitionCanvas: true,
+      recognitionTime: 0,
     });
     
     this.horizontalLines = new Array();
@@ -109,6 +115,15 @@ export default class Graphic extends Component{
     this.setState({ showSnackbar: false });
   }
 
+  endGameSnackBarClose(){
+    this.duration = 3000;
+    this.snackBarMessage = "";
+    this.snackBarClosing = this.snackBarClose;
+    this.actionMessage = "";
+    this.clearCanvas();
+    this.setState({ showSnackbar: false });
+  }
+
   componentDidMount(){
     this.recognitionCanvas = this.refs.recognitionCanvas;
     this.canvas = this.refs.context;
@@ -126,9 +141,6 @@ export default class Graphic extends Component{
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
       this.board[row][column] = "";
-
-      console.log(this.gestureArray);
-
       this.gestureArray.pop();
     }
     else{
@@ -184,10 +196,6 @@ export default class Graphic extends Component{
     var centreOfGestureX = gesture.centreX;
     var centreOfGestureY = gesture.centreY;
     var pointArray = gesture.strokes;
-
-    console.log("Shape: " + shape);
-    console.log("Score: " + score);
-
     if(this.boardDrawn){
       if(score < 0.15){
         this.snackBarMessage = "Please draw the shapes more carefully";
@@ -230,15 +238,12 @@ export default class Graphic extends Component{
 
       if(this.checkWinLogic(row, column, shape)){
         this.snackBarMessage = shape + " wins!";
+        this.duration = 100000;
+        this.actionMessage = "Clear";
+        this.snackBarClosing = this.endGameSnackBarClose;
         this.setState({ 
           showSnackbar: true,
-          clearRecognitionCanvas: true,
-          enabledGestures: ["Vertical Line", "Horizontal Line"],
-          disabledGestures: ["X", "O"],
-          recognitionTime: 0,
         });
-
-        this.clearCanvas();
       }
     }
     else{
@@ -292,7 +297,6 @@ export default class Graphic extends Component{
         });
       }
     }
-    console.log("Board Drawn: " + this.boardDrawn);
   }
 
   addGesture(e){
@@ -421,12 +425,12 @@ export default class Graphic extends Component{
 
   render(){
 
-    var right = Math.round(screen.width / 4);
-    var bottom = Math.round(screen.height / 4);
+    var right = Math.round(screen.width / 2);
+    var bottom = Math.round(screen.height / 2);
 
     //Styling
     const popover = {
-      position: 'fixed',
+      position: 'absolute',
       bottom: '50%',
       right: '50%',
       zIndex: '2',
@@ -490,11 +494,13 @@ export default class Graphic extends Component{
         />
 
          <Snackbar
+          action={this.actionMessage}
           open={this.state.showSnackbar}
           message={this.snackBarMessage}
-          autoHideDuration={3000}
-          onRequestClose={this.snackBarClose}
+          autoHideDuration={this.duration}
+          onRequestClose={this.snackBarClosing}
           style={snackBarStyle}
+          onActionTouchTap={this.snackBarClosing}
         />
 
         { this.state.displayColorPicker ? 

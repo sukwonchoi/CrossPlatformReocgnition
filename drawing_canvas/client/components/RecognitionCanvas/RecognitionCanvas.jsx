@@ -235,7 +235,7 @@ class RecognitionCanvas extends React.Component{
 	addClick(x, y){
 		var currentStroke = this.strokes.length - 1;
 
-		if(!isNaN(x) && !isNaN(y)){
+		if(!isNaN(x) && !isNaN(y) && x != null && y != null){
 			var point = new Point(x, y, currentStroke);
 			this.strokes[currentStroke].push(point);
 			this.pointArray.push(point);
