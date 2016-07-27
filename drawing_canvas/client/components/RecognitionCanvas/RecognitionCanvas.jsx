@@ -24,6 +24,7 @@ class RecognitionCanvas extends React.Component{
 	    color: 					React.PropTypes.string,
 	    disabledGestures: 		React.PropTypes.arrayOf(React.PropTypes.string),
 	    enabledGestures: 		React.PropTypes.arrayOf(React.PropTypes.string),
+	    addGestures: 			React.PropTypes.arrayOf(React.PropTypes.array)
   	}
 
 	constructor(props){
@@ -67,6 +68,7 @@ class RecognitionCanvas extends React.Component{
 		this.undoListener = props.undoListener;
 		this.redoListener = props.redoListener;
 		this.clearCanvasListener = props.clearCanvasListener;
+		this.addGestureListener = props.addGestureListener;
 
 		//width height
 		this.recognitionCanvasWidth = props.width;
@@ -136,6 +138,13 @@ class RecognitionCanvas extends React.Component{
 		this.$P.DisableGesture(nextProps.disabledGestures);
 		this.$P.EnableGesture(nextProps.enabledGestures);
 		this.recognitionTime = nextProps.recognitionTime;
+
+		if(nextProps.addGesture != null){
+			for(var i = 0; i < nextProps.addGesture.length; i++){
+				this.$P.AddGesture(nextProps.addGesture[i][0], nextProps.addGesture[i][1]);
+			}
+			this.addGestureListener();
+		}
 	}
 
 	recognize(){

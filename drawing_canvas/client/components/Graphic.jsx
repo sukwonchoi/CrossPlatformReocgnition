@@ -191,6 +191,7 @@ export default class Graphic extends Component{
     if(this.boardDrawn){
       if(score < 0.15){
         this.snackBarMessage = "Please draw the shapes more carefully";
+        this.gestureArray.push(shape);
         this.setState({ 
           showSnackbar: true,
           undo: true
@@ -243,6 +244,12 @@ export default class Graphic extends Component{
     else{
       if(score < 0.5){
         this.snackBarMessage = "Please draw the lines more carefully";
+        if(shape == "Horizontal Line"){
+          this.horizontalLines.push(pointArray[0]);
+        }
+        else{
+          this.verticalLines.push(pointArray[0]);
+        }
         this.setState({ 
           showSnackbar: true,
           undo: true
@@ -499,7 +506,7 @@ export default class Graphic extends Component{
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
           <Tab onActive={this.callUndo} icon={<Undo />} style ={ tabStyle }/>
           <Tab onActive={this.callRedo} icon={<Redo />} style ={ tabStyle }/>
-          <Tab onActive={ this.clearRecognitionCanvas } icon={<Replay />} style ={ tabStyle }/>
+          <Tab onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
           <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
         </Tabs>
 
