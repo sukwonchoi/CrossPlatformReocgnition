@@ -9,8 +9,6 @@ class RecognitionCanvas extends React.Component{
 
 	static defaultProps = {
     	color: "#000000",
-    	enabledGestures: [""],
-    	disabledGestures: [""],
   	}
 
 	static propTypes = {
@@ -133,8 +131,10 @@ class RecognitionCanvas extends React.Component{
 			this.clearCanvas();
 		}
 
+		this.color = nextProps.color;
+
 		this.$P.DisableGesture(nextProps.disabledGestures);
-		this.$P.EnableGesture(nextProps.enabledGestures	);
+		this.$P.EnableGesture(nextProps.enabledGestures);
 		this.recognitionTime = nextProps.recognitionTime;
 	}
 

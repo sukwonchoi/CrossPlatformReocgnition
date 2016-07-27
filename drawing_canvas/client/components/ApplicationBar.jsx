@@ -69,7 +69,7 @@ render(){
     <div>
       <Drawer
         docked={false}
-        open={this.state.open}>
+        open={false}>
         <MenuItem linkButton containerElement={<Link to="/game" />} onTouchTap={() => this.titleHandler("Tic Tac Toe")} primaryText="Tic Tac Toe" />
         <MenuItem linkButton containerElement={<Link to="/graph" />} onTouchTap={() => this.titleHandler("Swag")} primaryText="NEW STUFF" />
       </Drawer>
@@ -79,15 +79,6 @@ render(){
         isInitiallyOpen={true} 
         onLeftIconButtonTouchTap={this._toggle} 
         onLeftIconButtonClick={this._toggle}
-        iconElementRight={
-          <IconMenu 
-             iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-             targetOrigin={{horizontal: 'right', vertical: 'top'}} 
-             anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
-            <MenuItem primaryText="Refresh" />
-            <MenuItem linkButton containerElement={<Link to="/settings" />} onTouchTap={() => this.titleHandler("Settings")} primaryText="Settings" />
-          </IconMenu>
-        }
       />
       <Drawer ref="leftNav" docked={false} menuItems={menuItems} />
     </div>

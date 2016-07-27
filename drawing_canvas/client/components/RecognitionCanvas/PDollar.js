@@ -196,9 +196,6 @@ export function PDollarRecognizer() // constructor
 		var b = +Infinity;
 		var u = -1;
 
-		console.log("Black list");
-		console.log(this.GestureBlacklist);
-
 		for (var i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
 		{
 			if(!this.GestureBlacklist.includes(this.PointClouds[i].Name)){
@@ -233,12 +230,10 @@ export function PDollarRecognizer() // constructor
 		for(var i = 0; i < gesture.length; i++){
 			var y = gesture[i];
 			var x = this.GestureBlacklist.indexOf(y);
-			if(x != -1) {
+			if(x == -1) {
 				this.GestureBlacklist.push(gesture[i]);
 			}
 		}
-		console.log("Disable");
-		console.log(gesture);
 	};
 
 	this.EnableGesture	 = function(gesture){
@@ -250,8 +245,6 @@ export function PDollarRecognizer() // constructor
 				this.GestureBlacklist.splice(x, 1);
 			}
 		}
-		console.log("Enable");
-		console.log(gesture);
 	}
 }
 //
