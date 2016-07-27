@@ -199,12 +199,12 @@ class RecognitionCanvas extends React.Component{
 
 	undo(){
 		this.undoStorage.push(this.drawingPoints.pop());
-		this.undoListener(this.undoStorage.peek());
+		this.undoListener(this.undoStorage[this.undoStorage.length - 1]);
 		this.redrawAll();
 	}
 	
 	redo(){
-		this.drawingPoints.push(this.undoStorage.peek());
+		this.drawingPoints.push(this.undoStorage[this.undoStorage.length - 1]);
 		this.redoListener(this.undoStorage.pop());
 		this.redrawAll();
 	}
@@ -215,7 +215,7 @@ class RecognitionCanvas extends React.Component{
 	    this.pointArray.length = 0;
 	    this.drawingPoints.length = 0;
 	    this.strokeCount = 0;
-	    this.undoStorage = null;
+	    this.undoStorage.length = 0;
 	    this.clearCanvasListener();
 	}
 
