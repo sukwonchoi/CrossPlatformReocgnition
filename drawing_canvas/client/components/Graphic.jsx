@@ -143,8 +143,8 @@ export default class Graphic extends Component{
       var squareNumber = this.getSquareNumber(undoXCentre, undoYCentre);
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
-      this.board[row][column] = "";
       this.gestureArray.pop();
+      this.board[row][column] = (undoShape == this.gestureArray[this.gestureArray.length - 1]) ? undoShape : "";
     }
     else{
       if(undoShape == "Vertical Line"){
@@ -195,6 +195,8 @@ export default class Graphic extends Component{
 
   recognitionCallback(gesture){
     
+    console.log(this.gestureArray);
+
     if(this.boardDrawn){
       this.applyShapesToBoard(gesture);
     }
@@ -222,55 +224,54 @@ export default class Graphic extends Component{
     var centreOfGestureX = gesture.centreX;
     var centreOfGestureY = gesture.centreY;
     var pointArray = gesture.strokes;
+    
+    if(this.gestureArray[this.gestureArray.length - 1] == shape){
+      this.gestureArray.push(shape);
+      this.snackBarMessage = "It is not your turn!";
+      this.setState({
+        undo: true,
+        showSnackbar: true
+      });
+      return;
+    }
+
+    this.gestureArray.push(shape);
 
     if(score < 0.15){
         this.snackBarMessage = "Please draw the shapes more carefully";
-        this.gestureArray.push(shape);
         this.setState({ 
           showSnackbar: true,
           undo: true
         });
         return;
-      }
+    }
 
-      var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
-      var row = Math.floor((squareNumber-1) / 3);
-      var column = (squareNumber-1) % 3;
-
-      if(this.gestureArray[this.gestureArray.length - 1] == shape){
-        this.snackBarMessage = "It is not your turn!";
-        this.gestureArray.push(shape);
-        this.setState({
-          undo: true,
-          showSnackbar: true
-        });
-        return;
-      }
-
-      this.gestureArray.push(shape);
-      if(this.board[row][column] == ""){
-        this.board[row][column] = shape;
-      }
-      else{
-        this.snackBarMessage = "Draw somewhere else!";
-        this.gestureArray.push(shape);
-        this.setState({
-          undo: true,
-          showSnackbar: true
-        });
-        return;
-      }
+    var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
+    var row = Math.floor((squareNumber-1) / 3);
+    var column = (squareNumber-1) % 3;
+    
+    if(this.board[row][column] == ""){
+      this.board[row][column] = shape;
+    }
+    else{
+      this.snackBarMessage = "Draw somewhere else!";
+      this.setState({
+        undo: true,
+        showSnackbar: true
+      });
+      return;
+    }
 
 
-      if(this.checkWinLogic(row, column, shape)){
-        this.snackBarMessage = shape + " wins!";
-        this.duration = 100000;
-        this.actionMessage = "Clear";
-        this.snackBarClosing = this.endGameSnackBarClose;
-        this.setState({ 
-          showSnackbar: true,
-        });
-      }
+    if(this.checkWinLogic(row, column, shape)){
+      this.snackBarMessage = shape + " wins!";
+      this.duration = 100000;
+      this.actionMessage = "Clear";
+      this.snackBarClosing = this.endGameSnackBarClose;
+      this.setState({ 
+        showSnackbar: true,
+      });
+    }
   }
 
   applyLinesToBoard(gesture){
@@ -527,7 +528,7 @@ export default class Graphic extends Component{
 
         { this.state.displayColorPicker ? 
               <div id="colorPicker" style={ popover }>
-                <div style={ cover } onClick={ this.handleClose }/>
+                <div style={ cover } touchstart={this.handleClose} onClick={ this.handleClose }/>
                 <SwatchesPicker onChangeComplete={ this.handleChange }/>
             </div> : null }
 
