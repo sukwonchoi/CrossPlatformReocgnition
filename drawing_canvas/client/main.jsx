@@ -7,9 +7,7 @@ import MainMenu from './components/MainMenu.jsx';
 import Graphic from './components/Graphic.jsx';
 import Settings from './components/Settings.jsx';
 
-import RecognitionCanvas from './components/RecognitionCanvas/RecognitionCanvas.jsx'
-
-
+import { RecognitionCanvas } from 'recognition-canvas';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import { Router, Route, IndexRoute, browswerHistory } from 'react-router';

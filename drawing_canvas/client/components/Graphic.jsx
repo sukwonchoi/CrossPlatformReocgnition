@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import RecognitionCanvas from './RecognitionCanvas/RecognitionCanvas.jsx';
+import RecognitionCanvas from 'recognition-canvas';
+import Gesture from 'recognition-canvas';
 import ColorPicker from './ColorPicker.jsx';
 import {Tabs, Tab, Snackbar, FontIcon} from 'material-ui';
 import ActionFlightTakeoff from 'material-ui/svg-icons/action/flight-takeoff';
@@ -67,6 +68,17 @@ export default class Graphic extends Component{
   }
 
   callUndo(){
+    if(!this.boardDrawn){
+      if(this.verticalLines.length == 0 && this.horizontalLines.length == 0){
+        return;
+      }
+    }
+    else{
+      if(this.gestureArray.length == 0){
+        return;
+      }
+    } 
+
     this.setState({ undo: true });
   }
 
@@ -97,7 +109,8 @@ export default class Graphic extends Component{
     });
   }
 
-  handleClick() {
+  handleClick() {    
+    console.log("Handle close triggered");
     this.setState({ displayColorPicker: !this.state.displayColorPicker });
   };
 
@@ -195,7 +208,7 @@ export default class Graphic extends Component{
 
   recognitionCallback(gesture){
     
-    console.log(this.gestureArray);
+    console.log(gesture);
 
     if(this.boardDrawn){
       this.applyShapesToBoard(gesture);
@@ -506,9 +519,9 @@ export default class Graphic extends Component{
           clearCanvasListener={clearCanvasListener}
           undo={this.state.undo}
           redo={this.state.redo}
+          clearCanvas={this.state.clearRecognitionCanvas}
           beautification={true}
           color={this.state.color}
-          clearCanvas={this.state.clearRecognitionCanvas}
           width={screen.width}
           height={screen.height - 120}
           disabledGestures={this.state.disabledGestures}
@@ -528,15 +541,15 @@ export default class Graphic extends Component{
 
         { this.state.displayColorPicker ? 
               <div id="colorPicker" style={ popover }>
-                <div style={ cover } touchstart={this.handleClose} onClick={ this.handleClose }/>
+                <div style={ cover } onClick={ this.handleClose }/>
                 <SwatchesPicker onChangeComplete={ this.handleChange }/>
             </div> : null }
 
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
-          <Tab onActive={this.callUndo} icon={<Undo />} style ={ tabStyle }/>
-          <Tab onActive={this.callRedo} icon={<Redo />} style ={ tabStyle }/>
-          <Tab onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
-          <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
+          <Tab onTouchTap={ this.callUndo } onActive={ this.callUndo } icon={<Undo />} style ={ tabStyle }/>
+          <Tab onTouchTap={ this.callRedo } onActive={ this.callRedo } icon={<Redo />} style ={ tabStyle }/>
+          <Tab onTouchTap={ this.clearCanvas } onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
+          <Tab onTouchTap={ this.handleClick } onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
         </Tabs>
 
       </div>
