@@ -15,7 +15,7 @@
     "react-dom": "^15.1.0",
     "react-router": "^2.4.1",
     "react-tap-event-plugin": "^1.0.0",
-    "recognition-canvas": "^0.2.11"
+    "recognition-canvas": "^0.2.15"
   },
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.11.5"
