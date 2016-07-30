@@ -157,7 +157,7 @@ export default class Graphic extends Component{
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
       this.gestureArray.pop();
-      this.board[row][column] = (undoShape == this.gestureArray[this.gestureArray.length - 1]) ? undoShape : "";
+      this.board[row][column] = "";
     }
     else{
       if(undoShape == "Vertical Line"){
@@ -238,6 +238,8 @@ export default class Graphic extends Component{
     var centreOfGestureY = gesture.centreY;
     var pointArray = gesture.strokes;
     
+    console.log(this.board);
+
     if(this.gestureArray[this.gestureArray.length - 1] == shape){
       this.gestureArray.push(shape);
       this.snackBarMessage = "It is not your turn!";
@@ -250,7 +252,7 @@ export default class Graphic extends Component{
 
     this.gestureArray.push(shape);
 
-    if(score < 0.15){
+    if(score < 0.05){
         this.snackBarMessage = "Please draw the shapes more carefully";
         this.setState({ 
           showSnackbar: true,
