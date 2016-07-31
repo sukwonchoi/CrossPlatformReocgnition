@@ -277,16 +277,7 @@ export default class Graphic extends Component{
       return;
     }
 
-
-    if(this.checkWinLogic(row, column, shape)){
-      this.snackBarMessage = shape + " wins!";
-      this.duration = 100000;
-      this.actionMessage = "Clear";
-      this.snackBarClosing = this.endGameSnackBarClose;
-      this.setState({ 
-        showSnackbar: true,
-      });
-    }
+    this.checkWinLogic(row, column, shape);
   }
 
   applyLinesToBoard(gesture){
@@ -353,9 +344,13 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = s + " wins!";
-        this.setState({ showSnackbar: true });
-        return true;
+        this.snackBarMessage = shape + " wins!";
+        this.duration = 100000;
+        this.actionMessage = "Clear";
+        this.snackBarClosing = this.endGameSnackBarClose;
+        this.setState({ 
+          showSnackbar: true,
+        });
       }
     }
 
@@ -365,9 +360,13 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = s + " wins!";
-        this.setState({ showSnackbar: true });
-        return true;
+        this.snackBarMessage = shape + " wins!";
+        this.duration = 100000;
+        this.actionMessage = "Clear";
+        this.snackBarClosing = this.endGameSnackBarClose;
+        this.setState({ 
+          showSnackbar: true,
+        });
       }
     }
 
@@ -379,9 +378,13 @@ export default class Graphic extends Component{
           break;
         }
         if(i == n-1){
-          this.snackBarMessage = s + " wins!";
-          this.setState({ showSnackbar: true });
-          return true;
+          this.snackBarMessage = shape + " wins!";
+          this.duration = 100000;
+          this.actionMessage = "Clear";
+          this.snackBarClosing = this.endGameSnackBarClose;
+          this.setState({ 
+            showSnackbar: true,
+          });
         }
       }
     }
@@ -392,9 +395,13 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = s + " wins!";
-        this.setState({ showSnackbar: true });
-        return true;
+        this.snackBarMessage = shape + " wins!";
+        this.duration = 100000;
+        this.actionMessage = "Clear";
+        this.snackBarClosing = this.endGameSnackBarClose;
+        this.setState({ 
+          showSnackbar: true,
+        });
       }
     }
 
@@ -402,15 +409,19 @@ export default class Graphic extends Component{
     for(i = 0; i < n; i++){
       for(j = 0; j < n; j++){
         if(this.board[i][j] == ""){
-          return false;
+          return;
         }
       }
     }
 
     //if game is finished and no winner, its a draw
-    this.snackBarMessage = "It's a draw!";
-    this.setState({ showSnackbar: true });
-    return true;
+    this.snackBarMessage = "It's a tie!";
+    this.duration = 100000;
+    this.actionMessage = "Clear";
+    this.snackBarClosing = this.endGameSnackBarClose;
+    this.setState({ 
+      showSnackbar: true,
+    });
   }
 
   getSquareNumber(x, y){
@@ -524,8 +535,8 @@ export default class Graphic extends Component{
           clearCanvas={this.state.clearRecognitionCanvas}
           beautification={true}
           color={this.state.color}
-          width={screen.width}
-          height={screen.height - 120}
+          width={String(screen.width)}
+          height={String(screen.height - 120)}
           disabledGestures={this.state.disabledGestures}
           enabledGestures={this.state.enabledGestures}
           ref="recognitionCanvas"
