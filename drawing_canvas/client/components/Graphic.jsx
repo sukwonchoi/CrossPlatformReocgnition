@@ -455,7 +455,15 @@ export default class Graphic extends Component{
 
   checkWinLogic(x, y, s){
     var n = 3;
+
+    console.log("X: " +  x);
+
+    console.log("Y: " +  y);
+
+    console.log("s: " +  s);
+
     for(i = 0; i < n; i++){
+      console.log("ROW");
       if(this.board[x][i] != s){
         break;
       }
@@ -467,11 +475,13 @@ export default class Graphic extends Component{
         this.setState({ 
           showSnackbar: true,
         });
+        return;
       }
     }
 
     //check row
     for(i = 0; i < n; i++){
+      console.log("COLUMN");
       if(this.board[i][y] != s){
         break;
       }
@@ -483,6 +493,7 @@ export default class Graphic extends Component{
         this.setState({ 
           showSnackbar: true,
         });
+        return;
       }
     }
 
@@ -490,6 +501,7 @@ export default class Graphic extends Component{
     if(x == y){
       //we're on a diagonal
       for(i = 0; i < n; i++){
+        console.log("DIAGONAL");
         if(this.board[i][i] != s){
           break;
         }
@@ -501,13 +513,15 @@ export default class Graphic extends Component{
           this.setState({ 
             showSnackbar: true,
           });
+          return;
         }
       }
     }
 
     //check anti diag (thanks rampion)
     for(i = 0;i<n;i++){
-      if(this.board[i][(n-1)-i] != s){
+      console.log("ANTI-DIAGONAL");
+      if(this.board[(n-1)-i][i] != s){
         break;
       }
       if(i == n-1){
@@ -518,6 +532,7 @@ export default class Graphic extends Component{
         this.setState({ 
           showSnackbar: true,
         });
+        return;
       }
     }
 
