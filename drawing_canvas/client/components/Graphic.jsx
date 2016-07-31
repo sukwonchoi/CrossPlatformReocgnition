@@ -219,14 +219,86 @@ export default class Graphic extends Component{
 
     if(!this.boardDrawn){
       if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
-        this.boardDrawn = true;
-        this.snackBarMessage = "Board has been drawn";
-        this.setState({
-          disabledGestures: ["Vertical Line", "Horizontal Line"],
-          enabledGestures: ["X", "O"],
-          recognitionTime: 1000,
-          showSnackbar: true,
-        });
+        var verticalOne = this.verticalLines[0];
+        var verticalTwo = this.verticalLines[1];
+        var verticalOneHigherPoint = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[0] : verticalOne[1];
+        var verticalOneLowerPoint  = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[1] : verticalOne[0];
+        var verticalTwoHigherPoint = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[0] : verticalTwo[1];
+        var verticalTwoLowerPoint  = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[1] : verticalTwo[0];
+
+        var horizontalOne = this.horizontalLines[0];
+        var horizontalTwo = this.horizontalLines[1];
+        var horizontalOneLeftPoint  = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[0] : horizontalOne[1];
+        var horizontalOneRightPoint = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[1] : horizontalOne[0];
+        var horizontalTwoLeftPoint  = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[0] : horizontalTwo[1];
+        var horizontalTwoRightPoint = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[1] : horizontalTwo[0];
+
+        var verticalOneCheck = (
+                                  verticalOneHigherPoint.Y > horizontalOneLeftPoint.Y &&
+                                  verticalOneHigherPoint.Y > horizontalOneRightPoint.Y &&
+                                  verticalOneHigherPoint.Y > horizontalTwoLeftPoint.Y &&
+                                  verticalOneHigherPoint.Y > horizontalTwoRightPoint.Y &&
+                                  verticalOneLowerPoint.Y < horizontalOneLeftPoint.Y &&
+                                  verticalOneLowerPoint.Y < horizontalOneRightPoint.Y &&
+                                  verticalOneLowerPoint.Y < horizontalTwoLeftPoint.Y &&
+                                  verticalOneLowerPoint.Y < horizontalTwoRightPoint.Y 
+                               ) ? true : false;
+        var verticalTwoCheck = (
+                                  verticalTwoHigherPoint.Y > horizontalOneLeftPoint.Y &&
+                                  verticalTwoHigherPoint.Y > horizontalOneRightPoint.Y &&
+                                  verticalTwoHigherPoint.Y > horizontalTwoLeftPoint.Y &&
+                                  verticalTwoHigherPoint.Y > horizontalTwoRightPoint.Y &&
+                                  verticalTwoLowerPoint.Y < horizontalOneLeftPoint.Y &&
+                                  verticalTwoLowerPoint.Y < horizontalOneRightPoint.Y &&
+                                  verticalTwoLowerPoint.Y < horizontalTwoLeftPoint.Y &&
+                                  verticalTwoLowerPoint.Y < horizontalTwoRightPoint.Y 
+                                ) ? true : false;
+        var horizontalOneCheck = (
+                                  horizontalOneLeftPoint.X < verticalOneHigherPoint.X &&
+                                  horizontalOneLeftPoint.X < verticalOneLowerPoint.X &&
+                                  horizontalOneLeftPoint.X < verticalTwoHigherPoint.X &&
+                                  horizontalOneLeftPoint.X < verticalTwoLowerPoint.X &&
+                                  horizontalOneRightPoint.X > verticalOneHigherPoint.X &&
+                                  horizontalOneRightPoint.X > verticalOneLowerPoint.X &&
+                                  horizontalOneRightPoint.X > verticalTwoHigherPoint.X &&
+                                  horizontalOneRightPoint.X > verticalTwoLowerPoint.X 
+                                ) ? true : false;
+        var horizontalTwoCheck = (
+                                  horizontalTwoLeftPoint.X < verticalOneHigherPoint.X &&
+                                  horizontalTwoLeftPoint.X < verticalOneLowerPoint.X &&
+                                  horizontalTwoLeftPoint.X < verticalTwoHigherPoint.X &&
+                                  horizontalTwoLeftPoint.X < verticalTwoLowerPoint.X &&
+                                  horizontalTwoRightPoint.X > verticalOneHigherPoint.X &&
+                                  horizontalTwoRightPoint.X > verticalOneLowerPoint.X &&
+                                  horizontalTwoRightPoint.X > verticalTwoHigherPoint.X &&
+                                  horizontalTwoRightPoint.X > verticalTwoLowerPoint.X 
+                                ) ? true : false;
+
+
+        var boardCheck = (verticalOneCheck && verticalTwoCheck && horizontalOneCheck && horizontalTwoCheck) ? true : false;
+
+        console.log(verticalOneCheck);
+        console.log(verticalTwoCheck);
+        console.log(horizontalOneCheck);
+        console.log(horizontalTwoCheck);
+
+        if(boardCheck){
+          this.boardDrawn = true;
+          this.snackBarMessage = "Board has been drawn";
+          this.setState({
+            disabledGestures: ["Vertical Line", "Horizontal Line"],
+            enabledGestures: ["X", "O"],
+            recognitionTime: 1000,
+            showSnackbar: true,
+          });
+        }
+        else{
+          this.clearCanvas();
+          this.snackBarMessage = "Draw the board properly!";
+          this.setState({ 
+            showSnackbar: true,
+          });
+        }
       }
     }
   }
@@ -344,7 +416,7 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = shape + " wins!";
+        this.snackBarMessage = s + " wins!";
         this.duration = 100000;
         this.actionMessage = "Clear";
         this.snackBarClosing = this.endGameSnackBarClose;
@@ -360,7 +432,7 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = shape + " wins!";
+        this.snackBarMessage = s + " wins!";
         this.duration = 100000;
         this.actionMessage = "Clear";
         this.snackBarClosing = this.endGameSnackBarClose;
@@ -378,7 +450,7 @@ export default class Graphic extends Component{
           break;
         }
         if(i == n-1){
-          this.snackBarMessage = shape + " wins!";
+          this.snackBarMessage = s + " wins!";
           this.duration = 100000;
           this.actionMessage = "Clear";
           this.snackBarClosing = this.endGameSnackBarClose;
@@ -395,7 +467,7 @@ export default class Graphic extends Component{
         break;
       }
       if(i == n-1){
-        this.snackBarMessage = shape + " wins!";
+        this.snackBarMessage = s + " wins!";
         this.duration = 100000;
         this.actionMessage = "Clear";
         this.snackBarClosing = this.endGameSnackBarClose;
