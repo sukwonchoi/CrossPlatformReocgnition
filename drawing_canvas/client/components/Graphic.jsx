@@ -62,7 +62,7 @@ export default class Graphic extends Component{
     this.endGameSnackBarClose = this.endGameSnackBarClose.bind(this);
     this.applyShapesToBoard = this.applyShapesToBoard.bind(this);
     this.applyLinesToBoard = this.applyLinesToBoard.bind(this);
-
+    this.boardDrawnIsValid = this.boardDrawnIsValid.bind(this);
 
     this.snackBarClosing = this.snackBarClose;
   }
@@ -219,70 +219,7 @@ export default class Graphic extends Component{
 
     if(!this.boardDrawn){
       if(this.horizontalLines.length == 2 && this.verticalLines.length == 2){
-        var verticalOne = this.verticalLines[0];
-        var verticalTwo = this.verticalLines[1];
-        var verticalOneHigherPoint = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[0] : verticalOne[1];
-        var verticalOneLowerPoint  = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[1] : verticalOne[0];
-        var verticalTwoHigherPoint = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[0] : verticalTwo[1];
-        var verticalTwoLowerPoint  = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[1] : verticalTwo[0];
-
-        var horizontalOne = this.horizontalLines[0];
-        var horizontalTwo = this.horizontalLines[1];
-        var horizontalOneLeftPoint  = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[0] : horizontalOne[1];
-        var horizontalOneRightPoint = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[1] : horizontalOne[0];
-        var horizontalTwoLeftPoint  = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[0] : horizontalTwo[1];
-        var horizontalTwoRightPoint = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[1] : horizontalTwo[0];
-
-        var verticalOneCheck = (
-                                  verticalOneHigherPoint.Y > horizontalOneLeftPoint.Y &&
-                                  verticalOneHigherPoint.Y > horizontalOneRightPoint.Y &&
-                                  verticalOneHigherPoint.Y > horizontalTwoLeftPoint.Y &&
-                                  verticalOneHigherPoint.Y > horizontalTwoRightPoint.Y &&
-                                  verticalOneLowerPoint.Y < horizontalOneLeftPoint.Y &&
-                                  verticalOneLowerPoint.Y < horizontalOneRightPoint.Y &&
-                                  verticalOneLowerPoint.Y < horizontalTwoLeftPoint.Y &&
-                                  verticalOneLowerPoint.Y < horizontalTwoRightPoint.Y 
-                               ) ? true : false;
-        var verticalTwoCheck = (
-                                  verticalTwoHigherPoint.Y > horizontalOneLeftPoint.Y &&
-                                  verticalTwoHigherPoint.Y > horizontalOneRightPoint.Y &&
-                                  verticalTwoHigherPoint.Y > horizontalTwoLeftPoint.Y &&
-                                  verticalTwoHigherPoint.Y > horizontalTwoRightPoint.Y &&
-                                  verticalTwoLowerPoint.Y < horizontalOneLeftPoint.Y &&
-                                  verticalTwoLowerPoint.Y < horizontalOneRightPoint.Y &&
-                                  verticalTwoLowerPoint.Y < horizontalTwoLeftPoint.Y &&
-                                  verticalTwoLowerPoint.Y < horizontalTwoRightPoint.Y 
-                                ) ? true : false;
-        var horizontalOneCheck = (
-                                  horizontalOneLeftPoint.X < verticalOneHigherPoint.X &&
-                                  horizontalOneLeftPoint.X < verticalOneLowerPoint.X &&
-                                  horizontalOneLeftPoint.X < verticalTwoHigherPoint.X &&
-                                  horizontalOneLeftPoint.X < verticalTwoLowerPoint.X &&
-                                  horizontalOneRightPoint.X > verticalOneHigherPoint.X &&
-                                  horizontalOneRightPoint.X > verticalOneLowerPoint.X &&
-                                  horizontalOneRightPoint.X > verticalTwoHigherPoint.X &&
-                                  horizontalOneRightPoint.X > verticalTwoLowerPoint.X 
-                                ) ? true : false;
-        var horizontalTwoCheck = (
-                                  horizontalTwoLeftPoint.X < verticalOneHigherPoint.X &&
-                                  horizontalTwoLeftPoint.X < verticalOneLowerPoint.X &&
-                                  horizontalTwoLeftPoint.X < verticalTwoHigherPoint.X &&
-                                  horizontalTwoLeftPoint.X < verticalTwoLowerPoint.X &&
-                                  horizontalTwoRightPoint.X > verticalOneHigherPoint.X &&
-                                  horizontalTwoRightPoint.X > verticalOneLowerPoint.X &&
-                                  horizontalTwoRightPoint.X > verticalTwoHigherPoint.X &&
-                                  horizontalTwoRightPoint.X > verticalTwoLowerPoint.X 
-                                ) ? true : false;
-
-
-        var boardCheck = (verticalOneCheck && verticalTwoCheck && horizontalOneCheck && horizontalTwoCheck) ? true : false;
-
-        console.log(verticalOneCheck);
-        console.log(verticalTwoCheck);
-        console.log(horizontalOneCheck);
-        console.log(horizontalTwoCheck);
-
-        if(boardCheck){
+        if(this.boardDrawnIsValid()){
           this.boardDrawn = true;
           this.snackBarMessage = "Board has been drawn";
           this.setState({
@@ -301,6 +238,68 @@ export default class Graphic extends Component{
         }
       }
     }
+  }
+
+  boardDrawnIsValid(){
+    var verticalOne = this.verticalLines[0];
+    var verticalTwo = this.verticalLines[1];
+    var verticalOneHigherPoint = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[0] : verticalOne[1];
+    var verticalOneLowerPoint  = verticalOne[0].Y > verticalOne[1].Y ? verticalOne[1] : verticalOne[0];
+    var verticalTwoHigherPoint = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[0] : verticalTwo[1];
+    var verticalTwoLowerPoint  = verticalTwo[0].Y > verticalTwo[1].Y ? verticalTwo[1] : verticalTwo[0];
+
+    var horizontalOne = this.horizontalLines[0];
+    var horizontalTwo = this.horizontalLines[1];
+    var horizontalOneLeftPoint  = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[0] : horizontalOne[1];
+    var horizontalOneRightPoint = horizontalOne[0].X < horizontalOne[1].X ? horizontalOne[1] : horizontalOne[0];
+    var horizontalTwoLeftPoint  = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[0] : horizontalTwo[1];
+    var horizontalTwoRightPoint = horizontalTwo[0].X < horizontalTwo[1].X ? horizontalTwo[1] : horizontalTwo[0];
+
+    var verticalOneCheck = (
+                            verticalOneHigherPoint.Y > horizontalOneLeftPoint.Y &&
+                            verticalOneHigherPoint.Y > horizontalOneRightPoint.Y &&
+                            verticalOneHigherPoint.Y > horizontalTwoLeftPoint.Y &&
+                            verticalOneHigherPoint.Y > horizontalTwoRightPoint.Y &&
+                            verticalOneLowerPoint.Y < horizontalOneLeftPoint.Y &&
+                            verticalOneLowerPoint.Y < horizontalOneRightPoint.Y &&
+                            verticalOneLowerPoint.Y < horizontalTwoLeftPoint.Y &&
+                            verticalOneLowerPoint.Y < horizontalTwoRightPoint.Y 
+                           ) ? true : false;
+    
+    var verticalTwoCheck = (
+                            verticalTwoHigherPoint.Y > horizontalOneLeftPoint.Y &&
+                            verticalTwoHigherPoint.Y > horizontalOneRightPoint.Y &&
+                            verticalTwoHigherPoint.Y > horizontalTwoLeftPoint.Y &&
+                            verticalTwoHigherPoint.Y > horizontalTwoRightPoint.Y &&
+                            verticalTwoLowerPoint.Y < horizontalOneLeftPoint.Y &&
+                            verticalTwoLowerPoint.Y < horizontalOneRightPoint.Y &&
+                            verticalTwoLowerPoint.Y < horizontalTwoLeftPoint.Y &&
+                            verticalTwoLowerPoint.Y < horizontalTwoRightPoint.Y 
+                           ) ? true : false;
+    
+    var horizontalOneCheck = (
+                            horizontalOneLeftPoint.X < verticalOneHigherPoint.X &&
+                            horizontalOneLeftPoint.X < verticalOneLowerPoint.X &&
+                            horizontalOneLeftPoint.X < verticalTwoHigherPoint.X &&
+                            horizontalOneLeftPoint.X < verticalTwoLowerPoint.X &&
+                            horizontalOneRightPoint.X > verticalOneHigherPoint.X &&
+                            horizontalOneRightPoint.X > verticalOneLowerPoint.X &&
+                            horizontalOneRightPoint.X > verticalTwoHigherPoint.X &&
+                            horizontalOneRightPoint.X > verticalTwoLowerPoint.X 
+                              ) ? true : false;
+    var horizontalTwoCheck = (
+                            horizontalTwoLeftPoint.X < verticalOneHigherPoint.X &&
+                            horizontalTwoLeftPoint.X < verticalOneLowerPoint.X &&
+                            horizontalTwoLeftPoint.X < verticalTwoHigherPoint.X &&
+                            horizontalTwoLeftPoint.X < verticalTwoLowerPoint.X &&
+                            horizontalTwoRightPoint.X > verticalOneHigherPoint.X &&
+                            horizontalTwoRightPoint.X > verticalOneLowerPoint.X &&
+                            horizontalTwoRightPoint.X > verticalTwoHigherPoint.X &&
+                             horizontalTwoRightPoint.X > verticalTwoLowerPoint.X 
+                             ) ? true : false;
+
+
+    return (verticalOneCheck && verticalTwoCheck && horizontalOneCheck && horizontalTwoCheck);
   }
 
   applyShapesToBoard(gesture){
@@ -324,7 +323,7 @@ export default class Graphic extends Component{
 
     this.gestureArray.push(shape);
 
-    if(score < 0.05){
+    if(score == 0){
         this.snackBarMessage = "Please draw the shapes more carefully";
         this.setState({ 
           showSnackbar: true,
@@ -333,7 +332,52 @@ export default class Graphic extends Component{
         return;
     }
 
+    var minX = 9999999999;
+    var minY = 9999999999;
+    var maxX = 0;
+    var maxY = 0;
+
+    for(var i = 0; i < pointArray.length; i++){
+      for(var j = 0; j < pointArray[i].length; j++){
+        var point = pointArray[i][j];
+        maxX = point.X > maxX ? point.X : maxX;
+        maxY = point.Y > maxY ? point.Y : maxY;
+        minX = point.X < minX ? point.X : minX;
+        minY = point.Y < minY ? point.Y : minY;
+      }
+    }
+
+    var pointCheckOne =   this.getSquareNumber(centreOfGestureX, maxY);
+    var pointCheckTwo =   this.getSquareNumber(centreOfGestureX, minY);
+    var pointCheckThree = this.getSquareNumber(maxX, centreOfGestureY);
+    var pointCheckFour =  this.getSquareNumber(minX, centreOfGestureY);
+
     var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
+
+    console.log(pointCheckOne);
+    console.log(pointCheckTwo);
+    console.log(pointCheckThree);
+    console.log(pointCheckFour);
+    console.log(squareNumber);
+
+
+
+    var isValidDrawing = (
+                            pointCheckOne == pointCheckTwo &&
+                            pointCheckTwo == pointCheckThree &&
+                            pointCheckThree == pointCheckFour &&
+                            pointCheckFour == squareNumber
+                         ) ? true : false;
+
+    if(!isValidDrawing){
+      this.snackBarMessage = "Please draw inside one of the slots!";
+      this.setState({
+        undo: true,
+        showSnackbar: true
+      });
+      return;
+    }
+
     var row = Math.floor((squareNumber-1) / 3);
     var column = (squareNumber-1) % 3;
     
