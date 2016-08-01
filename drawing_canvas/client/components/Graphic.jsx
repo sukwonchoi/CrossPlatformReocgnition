@@ -115,6 +115,7 @@ export default class Graphic extends Component{
   };
 
   handleClose() {
+    console.log("handle close called");
     this.setState({ displayColorPicker: false });
   };
 
@@ -157,7 +158,12 @@ export default class Graphic extends Component{
       var row = Math.floor((squareNumber-1) / 3);
       var column = (squareNumber-1) % 3;
       this.gestureArray.pop();
-      this.board[row][column] = "";
+      if(this.board[row][column].length == 2){
+        this.board[row][column] = this.board[row][column].charAt(0);
+      }
+      else{
+        this.board[row][column] = "";
+      }
     }
     else{
       if(undoShape == "Vertical Line"){
@@ -311,27 +317,6 @@ export default class Graphic extends Component{
     
     console.log(this.board);
 
-    if(this.gestureArray[this.gestureArray.length - 1] == shape){
-      this.gestureArray.push(shape);
-      this.snackBarMessage = "It is not your turn!";
-      this.setState({
-        undo: true,
-        showSnackbar: true
-      });
-      return;
-    }
-
-    this.gestureArray.push(shape);
-
-    if(score == 0){
-        this.snackBarMessage = "Please draw the shapes more carefully";
-        this.setState({ 
-          showSnackbar: true,
-          undo: true
-        });
-        return;
-    }
-
     var minX = 9999999999;
     var minY = 9999999999;
     var maxX = 0;
@@ -354,14 +339,6 @@ export default class Graphic extends Component{
 
     var squareNumber = this.getSquareNumber(centreOfGestureX, centreOfGestureY);
 
-    console.log(pointCheckOne);
-    console.log(pointCheckTwo);
-    console.log(pointCheckThree);
-    console.log(pointCheckFour);
-    console.log(squareNumber);
-
-
-
     var isValidDrawing = (
                             pointCheckOne == pointCheckTwo &&
                             pointCheckTwo == pointCheckThree &&
@@ -369,8 +346,13 @@ export default class Graphic extends Component{
                             pointCheckFour == squareNumber
                          ) ? true : false;
 
-    if(!isValidDrawing){
-      this.snackBarMessage = "Please draw inside one of the slots!";
+    var row = Math.floor((squareNumber-1) / 3);
+    var column = (squareNumber-1) % 3;
+
+    if(this.gestureArray[this.gestureArray.length - 1] == shape){
+      this.gestureArray.push(shape);
+      this.board[row][column] = this.board[row][column] + "L";
+      this.snackBarMessage = "It is not your turn!";
       this.setState({
         undo: true,
         showSnackbar: true
@@ -378,13 +360,33 @@ export default class Graphic extends Component{
       return;
     }
 
-    var row = Math.floor((squareNumber-1) / 3);
-    var column = (squareNumber-1) % 3;
+    this.gestureArray.push(shape);
+
+    if(score == 0){
+        this.board[row][column] = this.board[row][column] + "L";
+        this.snackBarMessage = "Please draw the shapes more carefully";
+        this.setState({ 
+          showSnackbar: true,
+          undo: true
+        });
+        return;
+    }
+
+    if(!isValidDrawing){
+      this.board[row][column] = this.board[row][column] + "L";
+      this.snackBarMessage = "Please draw inside one of the slots!";
+      this.setState({
+        undo: true,
+        showSnackbar: true
+      });
+      return;
+    }
     
     if(this.board[row][column] == ""){
       this.board[row][column] = shape;
     }
     else{
+      this.board[row][column] = this.board[row][column] + "L";
       this.snackBarMessage = "Draw somewhere else!";
       this.setState({
         undo: true,
@@ -403,7 +405,7 @@ export default class Graphic extends Component{
     var centreOfGestureY = gesture.centreY;
     var pointArray = gesture.strokes;
     
-    if(score < 0.5){
+    if(score < 0.85){
         this.snackBarMessage = "Please draw the lines more carefully";
         if(shape == "Horizontal Line"){
           this.horizontalLines.push(pointArray[0]);
@@ -690,10 +692,9 @@ export default class Graphic extends Component{
             </div> : null }
 
         <Tabs style={ tabsStyle } inkBarStyle={ inkBarStyle } tabItemContainerStyle={ tabStyle }>
-          <Tab onTouchTap={ this.callUndo } onActive={ this.callUndo } icon={<Undo />} style ={ tabStyle }/>
-          <Tab onTouchTap={ this.callRedo } onActive={ this.callRedo } icon={<Redo />} style ={ tabStyle }/>
-          <Tab onTouchTap={ this.clearCanvas } onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
-          <Tab onTouchTap={ this.handleClick } onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
+          <Tab onActive={ this.callUndo } icon={<Undo />} style ={ tabStyle }/>
+          <Tab onActive={ this.clearCanvas } icon={<Replay />} style ={ tabStyle }/>
+          <Tab onActive={ this.handleClick } icon={<ImageColorLens />} style ={ tabStyle }/>
         </Tabs>
 
       </div>
