@@ -20,7 +20,6 @@ export default class Graphic extends Component{
       displayColorPicker: false,
       showSnackbar: false,
       enabledGestures: ["Vertical Line", "Horizontal Line"],
-      disabledGestures: ["X", "O"],
       recognitionAlgorithm: "$p",
       recognitionTime: 0,
       redo: false,
@@ -89,7 +88,6 @@ export default class Graphic extends Component{
   clearCanvas(){
     this.setState({ 
       enabledGestures: ["Vertical Line", "Horizontal Line"],
-      disabledGestures: ["X", "O"],
       clearRecognitionCanvas: true,
       recognitionTime: 0,
     });
@@ -229,7 +227,6 @@ export default class Graphic extends Component{
           this.boardDrawn = true;
           this.snackBarMessage = "Board has been drawn";
           this.setState({
-            disabledGestures: ["Vertical Line", "Horizontal Line"],
             enabledGestures: ["X", "O"],
             recognitionTime: 1000,
             showSnackbar: true,
@@ -659,7 +656,7 @@ export default class Graphic extends Component{
         <RecognitionCanvas 
           recognitionAlgorithm={this.state.recognitionAlgorithm}
           recognitionTime={this.state.recognitionTime}
-          recognitionUsingTimeout={false}
+          recognitionUsingTimeout={true}
 
           recognitionHandler={recognitionListener}
           undoHandler={undoListener}
@@ -676,7 +673,6 @@ export default class Graphic extends Component{
           width={String(screen.width)}
           height={String(screen.height - 120)}
 
-          disabledGestures={this.state.disabledGestures}
           enabledGestures={this.state.enabledGestures}
           ref="recognitionCanvas"
         />
