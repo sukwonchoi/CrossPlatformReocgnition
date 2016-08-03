@@ -362,7 +362,7 @@ export default class Graphic extends Component{
 
     this.gestureArray.push(shape);
 
-    if(score == 0){
+    if(score < 0.2){
         this.board[row][column] = this.board[row][column] + "L";
         this.snackBarMessage = "Please draw the shapes more carefully";
         this.setState({ 
@@ -659,17 +659,23 @@ export default class Graphic extends Component{
         <RecognitionCanvas 
           recognitionAlgorithm={this.state.recognitionAlgorithm}
           recognitionTime={this.state.recognitionTime}
-          recognitionListener={recognitionListener}
-          undoListener={undoListener}
-          redoListener={redoListener}
-          clearCanvasListener={clearCanvasListener}
-          undo={this.state.undo}
-          redo={this.state.redo}
-          clearCanvas={this.state.clearRecognitionCanvas}
+          recognitionUsingTimeout={false}
+
+          recognitionHandler={recognitionListener}
+          undoHandler={undoListener}
+          redoHandler={redoListener}
+          clearCanvasHandler={clearCanvasListener}
+
+          doUndo={this.state.undo}
+          doRedo={this.state.redo}
+          doClearCanvas={this.state.clearRecognitionCanvas}
+          
           beautification={true}
           color={this.state.color}
+          
           width={String(screen.width)}
           height={String(screen.height - 120)}
+
           disabledGestures={this.state.disabledGestures}
           enabledGestures={this.state.enabledGestures}
           ref="recognitionCanvas"
